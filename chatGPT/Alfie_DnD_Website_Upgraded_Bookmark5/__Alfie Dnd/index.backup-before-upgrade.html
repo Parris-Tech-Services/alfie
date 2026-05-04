@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alfie's D&D Campaign — Storm King's Thunder</title>
+  <style>
+    /* ============================================
+       CSS VARIABLES & THEME SYSTEM
+       ============================================ */
+    :root {
+      /* Dark Theme (Default) */
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --bg-card: #1c2128;
+      --border-color: #30363d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-primary: #58a6ff;
+      --accent-secondary: #388bfd;
+      --accent-hover: #79c0ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      
+      /* Reader Typography */
+      --font-body: 'Georgia', 'Times New Roman', serif;
+      --font-heading: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+      --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+      --font-sans: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+      
+      --font-size-base: 18px;
+      --line-height: 1.7;
+      --content-max-width: 800px;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #fafbfc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f0f3f6;
+      --bg-card: #ffffff;
+      --border-color: #d0d7de;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-muted: #8c959f;
+      --accent-primary: #0969da;
+      --accent-secondary: #0550ae;
+      --accent-hover: #0a3069;
+    }
+
+    /* ============================================
+       BASE STYLES
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ============================================
+       LAYOUT
+       ============================================ */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.4em;
+      color: var(--accent-primary);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .sidebar-header .subtitle {
+      font-size: 0.85em;
+      color: var(--text-secondary);
+    }
+
+    /* Navigation */
+    .nav-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-section-title {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tab {
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover, .nav-tab.active {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+
+    /* File List */
+    .file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 20px;
+    }
+
+    .folder-group {
+      margin-bottom: 20px;
+    }
+
+    .folder-title {
+      font-size: 0.8em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      padding-left: 8px;
+      font-weight: 500;
+    }
+
+    .file-item {
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .file-item:hover {
+      border-color: var(--accent-primary);
+      transform: translateX(4px);
+    }
+
+    .file-item.active {
+      border-color: var(--accent-primary);
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    .file-item h3 {
+      font-size: 0.95em;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .file-item p {
+      font-size: 0.8em;
+      color: var(--text-secondary);
+    }
+
+    .file-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.7em;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .tag-md { background: #238636; color: white; }
+    .tag-pdf { background: #da3633; color: white; }
+    .tag-docx { background: #58a6ff; color: white; }
+    .tag-html { background: #a371f7; color: white; }
+
+    /* ============================================
+       MAIN CONTENT AREA
+       ============================================ */
+    .main-content {
+      flex: 1;
+      margin-left: 320px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toolbar-label {
+      font-size: 0.8em;
+      color: var(--text-muted);
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-tertiary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-toggle span {
+      font-size: 0.85em;
+      color: var(--text-secondary);
+    }
+
+    .theme-icon {
+      font-size: 1.1em;
+    }
+
+    /* Font Controls */
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1em;
+      transition: all 0.2s;
+    }
+
+    .font-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+
+    .font-size-display {
+      font-size: 0.85em;
+      color: var(--text-secondary);
+      min-width: 40px;
+      text-align: center;
+    }
+
+    /* Font Family Select */
+    .font-select {
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.85em;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .font-select option {
+      background: var(--bg-secondary);
+    }
+
+    /* Document Viewer */
+    .document-viewer {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .document-content {
+      max-width: var(--content-max-width);
+      margin: 0 auto;
+      line-height: var(--line-height);
+    }
+
+    /* Reader Typography */
+    .document-content {
+      font-family: var(--font-body);
+      font-size: var(--font-size-base);
+    }
+
+    .document-content h1 {
+      font-family: var(--font-heading);
+      font-size: 2em;
+      color: var(--text-primary);
+      margin-bottom: 0.5em;
+      padding-bottom: 0.3em;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .document-content h2 {
+      font-family: var(--font-heading);
+      font-size: 1.5em;
+      color: var(--accent-primary);
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+
+    .document-content h3 {
+      font-family: var(--font-heading);
+      font-size: 1.2em;
+      color: var(--text-primary);
+      margin-top: 1.2em;
+      margin-bottom: 0.4em;
+    }
+
+    .document-content p {
+      margin-bottom: 1em;
+      color: var(--text-primary);
+    }
+
+    .document-content ul, .document-content ol {
+      margin-bottom: 1em;
+      padding-left: 1.5em;
+    }
+
+    .document-content li {
+      margin-bottom: 0.3em;
+    }
+
+    .document-content code {
+      font-family: var(--font-mono);
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .document-content pre {
+      background: var(--bg-tertiary);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 1em;
+    }
+
+    .document-content pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .document-content blockquote {
+      border-left: 4px solid var(--accent-primary);
+      padding-left: 16px;
+      margin: 1em 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .document-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1em 0;
+    }
+
+    .document-content th, .document-content td {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    .document-content th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+    }
+
+    .document-content a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .document-content a:hover {
+      text-decoration: underline;
+    }
+
+    .document-content strong {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .document-content em {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    /* Welcome Screen */
+    .welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      padding: 60px;
+    }
+
+    .welcome-screen h2 {
+      font-size: 2em;
+      color: var(--accent-primary);
+      margin-bottom: 16px;
+    }
+
+    .welcome-screen p {
+      color: var(--text-secondary);
+      font-size: 1.1em;
+      max-width: 500px;
+    }
+
+    .welcome-icon {
+      font-size: 4em;
+      margin-bottom: 24px;
+    }
+
+    /* Mobile Toggle */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 200;
+      width: 44px;
+      height: 44px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .mobile-toggle {
+        display: flex;
+      }
+      
+      .document-viewer {
+        padding: 20px;
+      }
+      
+      .toolbar {
+        padding: 12px 16px;
+      }
+      
+      .toolbar-group {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+  
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>⚔️ Alfie's D&D</h1>
+        <p class="subtitle">Storm King's Thunder — Dubbo Table</p>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">View Mode</div>
+        <div class="nav-tabs">
+          <button class="nav-tab active" onclick="showView('files')">📁 Files</button>
+          <button class="nav-tab" onclick="showView('inventory')">🎒 Inventory</button>
+          <button class="nav-tab" onclick="showView('characters')">👥 Characters</button>
+        </div>
+      </nav>
+
+      <!-- File Browser -->
+      <div class="file-list" id="fileList">
+        <!-- Files loaded via JavaScript -->
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <span class="toolbar-label">Theme:</span>
+          <div class="theme-toggle" onclick="toggleTheme()">
+            <span class="theme-icon" id="themeIcon">🌙</span>
+            <span id="themeText">Dark</span>
+          </div>
+        </div>
+
+        <div class="toolbar-group">
+          <span class="toolbar-label">Font:</span>
+          <select class="font-select" onchange="changeFont(this.value)">
+            <option value="Georgia, serif">Georgia</option>
+            <option value="Palatino Linotype, serif">Palatino</option>
+            <option value="Times New Roman, serif">Times</option>
+            <option value="Segoe UI, sans-serif">Segoe UI</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="Consolas, monospace">Consolas</option>
+          </select>
+        </div>
+
+        <div class="toolbar-group font-controls">
+          <span class="toolbar-label">Size:</span>
+          <button class="font-btn" onclick="changeFontSize(-2)">A-</button>
+          <span class="font-size-display" id="fontSizeDisplay">18px</span>
+          <button class="font-btn" onclick="changeFontSize(2)">A+</button>
+        </div>
+      </div>
+
+      <!-- Document Viewer -->
+      <div class="document-viewer">
+        <div class="document-content" id="documentContent">
+          <div class="welcome-screen">
+            <div class="welcome-icon">📚</div>
+            <h2>Welcome to Alfie's Campaign</h2>
+            <p>Select a document from the sidebar to view it here. Use the toolbar above to customize your reading experience.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ============================================
+    // FILE DATA
+    // ============================================
+    const files = [
+      {
+        name: 'Alphie_Complete_Inventory.md',
+        path: 'Alphie_Complete_Inventory.md',
+        folder: 'Root',
+        type: 'md',
+        description: 'Complete item inventory for Alphie J. Roane'
+      },
+      {
+        name: 'ChatGPThandover27042026.md',
+        path: 'ChatGPThandover27042026.md',
+        folder: 'Root',
+        type: 'md',
+        description: 'Current checkpoint — Bookmark 5, Rillix the tressym'
+      },
+      {
+        name: 'ClaudeHandover27042026.md',
+        path: 'ClaudeHandover27042026.md',
+        folder: 'Root',
+        type: 'md',
+        description: 'Claude handover document'
+      },
+      {
+        name: 'GemeniHandover27042026.md',
+        path: 'GemeniHandover27042026.md',
+        folder: 'Root',
+        type: 'md',
+        description: 'Campaign handover — Nightstone to Ardeep'
+      },
+      {
+        name: 'REPOSITORY_FILE_TREE.md',
+        path: 'REPOSITORY_FILE_TREE.md',
+        folder: 'Root',
+        type: 'md',
+        description: 'Complete file tree of campaign repo'
+      },
+      {
+        name: 'index.html',
+        path: 'index.html',
+        folder: 'Root',
+        type: 'html',
+        description: 'Previous website version'
+      },
+      {
+        name: '__Storm King_s Thunder (1-10).pdf',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/__Storm%20King_s%20Thunder%20(1-10).pdf',
+        folder: 'Reference',
+        type: 'pdf',
+        description: 'Core campaign rulebook'
+      },
+      {
+        name: '_Storm_Kings_Thunder_Dubbo_Session_0_Table_Packet.pdf',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/_Storm_Kings_Thunder_Dubbo_Session_0_Table_Packet.pdf',
+        folder: 'Reference',
+        type: 'pdf',
+        description: 'Session 0 reference packet'
+      },
+      {
+        name: 'Nightstone_Tactical_Dossier.pdf',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/Nightstone_Tactical_Dossier.pdf',
+        folder: 'Reference',
+        type: 'pdf',
+        description: 'Nightstone tactical map'
+      },
+      {
+        name: 'SKT_Dubbo_Resume_Checkpoint_4_Handover.md',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/Checkpoints/SKT_Dubbo_Resume_Checkpoint_4_Handover.md',
+        folder: 'Checkpoints',
+        type: 'md',
+        description: 'Current resume point'
+      },
+      {
+        name: '1 Alphie_J_Roane_Level_3_Character_Sheet.pdf',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/Level%203%20character%20sheets/1%20Alphie_J_Roane_Level_3_Character_Sheet.pdf',
+        folder: 'Characters',
+        type: 'pdf',
+        description: 'Alphie Level 3 sheet'
+      },
+      {
+        name: '2 Dorrin_Stonebrook_Level_3_Character_Sheet.pdf',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/Level%203%20character%20sheets/2%20Dorrin_Stonebrook_Level_3_Character_Sheet.pdf',
+        folder: 'Characters',
+        type: 'pdf',
+        description: 'Dorrin Level 3 sheet'
+      },
+      {
+        name: '3 Wren_Level_3_Character_Sheet.pdf',
+        path: 'file:///c:/Users/joshua.parris/Downloads/Alphie%20Wizard%20-%20Storm%20kings%20-20260427T114209Z-3-001/Alphie%20Wizard%20-%20Storm%20kings/Level%203%20character%20sheets/3%20Wren_Level_3_Character_Sheet.pdf',
+        folder: 'Characters',
+        type: 'pdf',
+        description: 'Wren Level 3 sheet'
+      }
+    ];
+
+    // ============================================
+    // STATE
+    // ============================================
+    let currentFontSize = 18;
+    let currentFont = 'Georgia, serif';
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFileList();
+    });
+
+    // ============================================
+    // FILE LIST RENDERING
+    // ============================================
+    function renderFileList() {
+      const fileList = document.getElementById('fileList');
+      const folders = {};
+      
+      // Group files by folder
+      files.forEach(file => {
+        if (!folders[file.folder]) {
+          folders[file.folder] = [];
+        }
+        folders[file.folder].push(file);
+      });
+      
+      // Render folders
+      let html = '';
+      for (const [folderName, folderFiles] of Object.entries(folders)) {
+        html += `<div class="folder-group">
+          <div class="folder-title">📂 ${folderName}</div>`;
+      
+        folderFiles.forEach(file => {
+          const tagClass = `tag-${file.type}`;
+          html += `<div class="file-item" onclick="openFile('${file.path}', '${file.name}', '${file.type}')">
+            <h3>${file.name}</h3>
+            <p>${file.description}</p>
+            <span class="file-tag ${tagClass}">${file.type.toUpperCase()}</span>
+          </div>`;
+        });
+      
+        html += '</div>';
+      }
+      
+      fileList.innerHTML = html;
+    }
+
+    // ============================================
+    // FILE OPENING
+    // ============================================
+    function openFile(path, name, type) {
+      const content = document.getElementById('documentContent');
+      
+      if (type === 'pdf') {
+        // Open PDF in iframe
+        content.innerHTML = `<iframe src="${path}" style="width: 100%; height: 80vh; border: none; border-radius: 8px;"></iframe>
+          <p style="text-align: center; margin-top: 16px; color: var(--text-secondary);">
+            <a href="${path}" target="_blank" style="color: var(--accent-primary);">Open in new tab ↗</a>
+          </p>`;
+      } else if (type === 'md' || type === 'html') {
+        // Fetch and render markdown-like content
+        fetch(path)
+          .then(response => response.text())
+          .then(text => {
+            content.innerHTML = parseMarkdown(text);
+          })
+          .catch(err => {
+            content.innerHTML = `<p>Error loading file: ${err.message}</p>`;
+          });
+      } else {
+        content.innerHTML = `<p>Cannot preview ${type} files. <a href="${path}" target="_blank">Open in new tab ↗</a></p>`;
+      }
+      
+      // Close sidebar on mobile
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
+    // ============================================
+    // MARKDOWN PARSER (Simple)
+    // ============================================
+    function parseMarkdown(text) {
+      let html = text;
+      
+      // Headers
+      html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+      
+      // Bold
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      // Italic
+      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      // Code blocks
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+      
+      // Inline code
+      html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+      
+      // Links
+      html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+      
+      // Blockquotes
+      html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+      
+      // Unordered lists
+      html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+      
+      // Ordered lists
+      html = html.replace(/^\d+\. (.*$)/gm, '<li>$1</li>');
+      
+      // Tables (simple)
+      html = html.replace(/\|(.*)\|/g, (match) => {
+        const cells = match.split('|').filter(c => c.trim());
+        if (cells.some(c => c.trim().match(/^-+$/))) {
+          return ''; // Skip separator rows
+        }
+        return '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+      });
+      html = html.replace(/(<tr>.*<\/tr>)+/g, '<table>$&</table>');
+      
+      // Paragraphs
+      html = html.replace(/\n\n/g, '</p><p>');
+      html = '<p>' + html + '</p>';
+      
+      // Clean up
+      html = html.replace(/<p><\/p>/g, '');
+      html = html.replace(/<p>(<h[1-3]>)/g, '$1');
+      html = html.replace(/(<\/h[1-3]>)<\/p>/g, '$1');
+      html = html.replace(/<p>(<ul>)/g, '$1');
+      html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+      html = html.replace(/<p>(<pre>)/g, '$1');
+      html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+      html = html.replace(/<p>(<table>)/g, '$1');
+      html = html.replace(/(<\/table>)<\/p>/g, '$1');
+      html = html.replace(/<p>(<blockquote>)/g, '$1');
+      html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
+      
+      return html;
+    }
+
+    // ============================================
+    // THEME TOGGLE
+    // ============================================
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+      
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.setAttribute('data-theme', 'light');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark';
+      }
+    }
+
+    // ============================================
+    // FONT SIZE CONTROLS
+    // ============================================
+    function changeFontSize(delta) {
+      currentFontSize = Math.max(12, Math.min(32, currentFontSize + delta));
+      document.documentElement.style.setProperty('--font-size-base', currentFontSize + 'px');
+      document.getElementById('fontSizeDisplay').textContent = currentFontSize + 'px';
+    }
+
+    // ============================================
+    // FONT FAMILY
+    // ============================================
+    function changeFont(font) {
+      currentFont = font;
+      document.documentElement.style.setProperty('--font-body', font);
+      document.documentElement.style.setProperty('--font-heading', font);
+    }
+
+    // ============================================
+    // VIEW MODES
+    // ============================================
+    function showView(view) {
+      // Update active tab
+      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // For now, just show file list
+      // Could add inventory/character views later
+    }
+
+    // ============================================
+    // MOBILE SIDEBAR
+    // ============================================
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Start Here</h2>
+              <p>The most useful documents first, in the order you are likely to need them.</p>
+            </div>
+          </div>
+          <div class="card-grid" id="quick-links"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>All Files</h2>
+              <p>Search and filter the full file list without digging through Explorer.</p>
+            </div>
+          </div>
+          <p style="margin: 0 0 16px; color: var(--muted);">
+            The generated inventory files are listed too. Their size metadata is intentionally treated as refresh-time data rather than fixed values.
+          </p>
+          <div class="controls">
+            <input id="search" type="search" placeholder="Search by file name, path, or group">
+            <select id="group-filter">
+              <option value="all">All groups</option>
+            </select>
+            <select id="type-filter">
+              <option value="all">All file types</option>
+            </select>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Group</th>
+                <th>Type</th>
+                <th>Folder</th>
+                <th>Size</th>
+              </tr>
+            </thead>
+            <tbody id="file-table"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Top-Level Order</h2>
+              <p>Major folders and root files, arranged by purpose.</p>
+            </div>
+          </div>
+          <div class="folder-list" id="top-level"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Folder Tree</h2>
+              <p>Exact structure as generated from the repo.</p>
+            </div>
+          </div>
+          <pre class="tree" id="tree-view"></pre>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      Refresh the generated data with <code>powershell -ExecutionPolicy Bypass -File scripts/build-repo-browser.ps1</code>.
+    </footer>
+  </div>
+
+  <script src="site/repo-data.js"></script>
+  <script>
+    const data = window.REPO_DATA || null;
+
+    function formatDate(value) {
+      if (!value) return "Not generated yet";
+      const date = new Date(value);
+      return date.toLocaleString();
+    }
+
+    function formatSize(bytes) {
+      if (typeof bytes !== "number") return "-";
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function sortByPriority(items) {
+      const priority = {
+        "docs": 1,
+        "site": 2,
+        "scripts": 3
+      };
+
+      return [...items].sort((a, b) => {
+        const aKey = a.type === "folder" ? a.name : a.path;
+        const bKey = b.type === "folder" ? b.name : b.path;
+        const aScore = priority[aKey] || 99;
+        const bScore = priority[bKey] || 99;
+        if (aScore !== bScore) return aScore - bScore;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    function renderQuickLinks(items) {
+      const mount = document.getElementById("quick-links");
+      if (!items.length) {
+        mount.innerHTML = '<div class="empty">No quick links have been generated yet.</div>';
+        return;
+      }
+
+      mount.innerHTML = items.map((item) => `
+        <a class="card" href="${encodeURI(item.path)}" target="_blank" rel="noopener">
+          <span class="tag">${item.group}</span>
+          <h3>${item.title}</h3>
+          <p>${item.path}</p>
+        </a>
+      `).join("");
+    }
+
+    function renderTopLevel(folders, files) {
+      const mount = document.getElementById("top-level");
+      const rootFolders = folders
+        .filter((folder) => !folder.path.includes("/"))
+        .map((folder) => ({
+          type: "folder",
+          name: folder.name,
+          path: folder.path,
+          description: folder.group,
+          meta: "Folder"
+        }));
+
+      const rootFiles = files
+        .filter((file) => !file.path.includes("/"))
+        .map((file) => ({
+          type: "file",
+          name: file.name,
+          path: file.path,
+          description: file.group,
+          meta: file.type
+        }));
+
+      const items = sortByPriority([...rootFolders, ...rootFiles]);
+      if (!items.length) {
+        mount.innerHTML = '<div class="empty">No top-level entries were found.</div>';
+        return;
+      }
+
+      mount.innerHTML = items.map((item) => {
+        const label = item.type === "file"
+          ? `<a href="${encodeURI(item.path)}" target="_blank" rel="noopener"><strong>${item.name}</strong></a>`
+          : `<strong>${item.name}</strong>`;
+        return `
+          <div class="folder-row">
+            <div>
+              ${label}
+              <span>${item.description}</span>
+            </div>
+            <div class="pill">${item.meta}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function fillFilters(files) {
+      const groupFilter = document.getElementById("group-filter");
+      const typeFilter = document.getElementById("type-filter");
+
+      const groups = [...new Set(files.map((file) => file.group))].sort();
+      const types = [...new Set(files.map((file) => file.type))].sort();
+
+      groupFilter.innerHTML = '<option value="all">All groups</option>' +
+        groups.map((group) => `<option value="${group}">${group}</option>`).join("");
+
+      typeFilter.innerHTML = '<option value="all">All file types</option>' +
+        types.map((type) => `<option value="${type}">${type}</option>`).join("");
+    }
+
+    function renderFileTable(files) {
+      const searchValue = document.getElementById("search").value.trim().toLowerCase();
+      const groupValue = document.getElementById("group-filter").value;
+      const typeValue = document.getElementById("type-filter").value;
+      const mount = document.getElementById("file-table");
+
+      const filtered = files.filter((file) => {
+        const haystack = `${file.name} ${file.path} ${file.group}`.toLowerCase();
+        const matchesSearch = !searchValue || haystack.includes(searchValue);
+        const matchesGroup = groupValue === "all" || file.group === groupValue;
+        const matchesType = typeValue === "all" || file.type === typeValue;
+        return matchesSearch && matchesGroup && matchesType;
+      });
+
+      if (!filtered.length) {
+        mount.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty">No files match the current filters.</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      mount.innerHTML = filtered.map((file) => `
+        <tr>
+          <td><a href="${encodeURI(file.path)}" target="_blank" rel="noopener">${file.name}</a><br><span>${file.path}</span></td>
+          <td>${file.group}</td>
+          <td>${file.type}</td>
+          <td>${file.folder || "."}</td>
+          <td>${formatSize(file.sizeBytes)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function bindFilters(files) {
+      ["search", "group-filter", "type-filter"].forEach((id) => {
+        document.getElementById(id).addEventListener("input", () => renderFileTable(files));
+        document.getElementById(id).addEventListener("change", () => renderFileTable(files));
+      });
+    }
+
+    function render(dataSet) {
+      if (!dataSet) {
+        document.getElementById("quick-links").innerHTML = '<div class="empty">The repo data file was not found.</div>';
+        return;
+      }
+
+      document.getElementById("generated-at").textContent = `Generated ${formatDate(dataSet.generatedAt)}`;
+      document.getElementById("root-path").textContent = dataSet.rootPath || "Root path unavailable";
+
+      document.getElementById("stat-files").textContent = dataSet.summary.fileCount;
+      document.getElementById("stat-folders").textContent = dataSet.summary.folderCount;
+      document.getElementById("stat-markdown").textContent = dataSet.summary.markdownCount;
+      document.getElementById("stat-scripts").textContent = dataSet.summary.scriptCount;
+
+      renderQuickLinks(dataSet.quickLinks || []);
+      renderTopLevel(dataSet.folders || [], dataSet.files || []);
+      fillFilters(dataSet.files || []);
+      renderFileTable(dataSet.files || []);
+      bindFilters(dataSet.files || []);
+      document.getElementById("tree-view").textContent = (dataSet.treeLines || []).join("\n");
+    }
+
+    render(data);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alfie DnD Vault</title>
+  <style>
+    :root {
+      --font-ui: "Aptos", "Segoe UI", Tahoma, sans-serif;
+      --font-reading: "Georgia", "Cambria", "Times New Roman", serif;
+      --font-mono: "Cascadia Code", Consolas, "Courier New", monospace;
+      --reader-font-size: 18px;
+      --reader-line-height: 1.72;
+      --reader-max-width: 860px;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-lg: 0 28px 70px rgba(8, 15, 30, 0.18);
+      --shadow-md: 0 12px 32px rgba(8, 15, 30, 0.12);
+      --sidebar-width: 360px;
+    }
+
+    body[data-theme="night"] {
+      --bg: #0b1220;
+      --bg-2: #111a2b;
+      --bg-3: #1a2740;
+      --panel: rgba(14, 23, 39, 0.88);
+      --panel-strong: rgba(19, 30, 50, 0.96);
+      --panel-soft: rgba(24, 37, 60, 0.92);
+      --line: rgba(142, 170, 214, 0.14);
+      --line-strong: rgba(142, 170, 214, 0.24);
+      --ink: #eef4ff;
+      --muted: #9eb1cb;
+      --soft: #7d90aa;
+      --accent: #8fc0ff;
+      --accent-2: #4f7fd0;
+      --accent-glow: rgba(143, 192, 255, 0.18);
+      --pill: rgba(143, 192, 255, 0.12);
+      --reader: rgba(10, 17, 29, 0.76);
+      --reader-edge: rgba(143, 192, 255, 0.1);
+      --button-text: #f7fbff;
+    }
+
+    body[data-theme="paper"] {
+      --bg: #efe4d1;
+      --bg-2: #e2d1b6;
+      --bg-3: #fff9f0;
+      --panel: rgba(255, 250, 242, 0.9);
+      --panel-strong: rgba(255, 249, 239, 0.98);
+      --panel-soft: rgba(246, 236, 221, 0.96);
+      --line: rgba(104, 77, 50, 0.14);
+      --line-strong: rgba(104, 77, 50, 0.24);
+      --ink: #261c14;
+      --muted: #68513c;
+      --soft: #856b54;
+      --accent: #915f32;
+      --accent-2: #6f4624;
+      --accent-glow: rgba(145, 95, 50, 0.14);
+      --pill: rgba(145, 95, 50, 0.1);
+      --reader: rgba(255, 252, 247, 0.78);
+      --reader-edge: rgba(145, 95, 50, 0.08);
+      --button-text: #fffaf4;
+    }
+
+    body[data-theme="day"] {
+      --bg: #eef4fb;
+      --bg-2: #dae6f4;
+      --bg-3: #ffffff;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: rgba(255, 255, 255, 0.98);
+      --panel-soft: rgba(248, 251, 255, 0.98);
+      --line: rgba(67, 95, 133, 0.12);
+      --line-strong: rgba(67, 95, 133, 0.22);
+      --ink: #1c2c40;
+      --muted: #5c718b;
+      --soft: #8396ae;
+      --accent: #3a6bb0;
+      --accent-2: #274d84;
+      --accent-glow: rgba(58, 107, 176, 0.14);
+      --pill: rgba(58, 107, 176, 0.1);
+      --reader: rgba(255, 255, 255, 0.82);
+      --reader-edge: rgba(58, 107, 176, 0.08);
+      --button-text: #f7fbff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, var(--accent-glow), transparent 24%),
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.05), transparent 20%),
+        linear-gradient(140deg, var(--bg) 0%, var(--bg-2) 52%, var(--bg) 100%);
+      transition: color 160ms ease, background 160ms ease;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.02) 0,
+          rgba(255, 255, 255, 0.02) 1px,
+          transparent 1px,
+          transparent 48px
+        );
+      opacity: 0.34;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .mobile-toggle {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      background: var(--panel-strong);
+      color: var(--ink);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(14px);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 22px 18px 28px 24px;
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(18px);
+    }
+
+    .sidebar::-webkit-scrollbar,
+    .main::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb,
+    .main::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: var(--line-strong);
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--panel-strong), rgba(255, 255, 255, 0.02));
+      box-shadow: var(--shadow-md);
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .brand-card {
+      padding: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    .brand-card h1 {
+      margin: 0;
+      font-size: 1.78rem;
+      line-height: 1.05;
+      font-family: var(--font-reading);
+    }
+
+    .brand-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .search-card,
+    .summary-card,
+    .quick-card,
+    .pdf-card,
+    .library-card {
+      padding: 16px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 0.98rem;
+    }
+
+    .small-note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .search-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .search-input,
+    .filter-select,
+    .control-range {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg-3);
+      color: var(--ink);
+    }
+
+    .search-input,
+    .filter-select {
+      padding: 12px 13px;
+    }
+
+    .control-range {
+      appearance: none;
+      height: 6px;
+      padding: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      outline: none;
+    }
+
+    .control-range::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--bg-3);
+      border: 2px solid var(--accent-2);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    }
+
+    .control-range::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent-2);
+      border-radius: 999px;
+      background: var(--bg-3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .count-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--pill);
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .stat .label {
+      display: block;
+      color: var(--soft);
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat .value {
+      font-size: 1.22rem;
+      font-weight: 700;
+    }
+
+    .quick-links,
+    .pdf-shelf {
+      display: grid;
+      gap: 8px;
+    }
+
+    .quick-link,
+    .pdf-link,
+    .file-button,
+    .theme-button,
+    .utility-button,
+    .inline-file-link {
+      width: 100%;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.03);
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    .quick-link,
+    .pdf-link {
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+    }
+
+    .quick-link:hover,
+    .pdf-link:hover,
+    .file-button:hover,
+    .theme-button:hover,
+    .utility-button:hover,
+    .inline-file-link:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .pdf-group {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pdf-group:first-of-type {
+      margin-top: 0;
+    }
+
+    .group-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .group-title span {
+      color: var(--soft);
+      font-size: 0.78rem;
+      font-weight: 400;
+    }
+
+    .location-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .location-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 0.9rem;
+    }
+
+    .location-row code {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: transparent;
+      padding: 0;
+    }
+
+    .library-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .library-group {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.03);
+      overflow: hidden;
+    }
+
+    .library-group summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .library-group summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .library-group summary span {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 0.84rem;
+    }
+
+    .file-list {
+      display: grid;
+      gap: 8px;
+      padding: 0 10px 10px;
+    }
+
+    .file-button {
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 12px;
+    }
+
+    .file-button strong {
+      display: block;
+      font-size: 0.93rem;
+    }
+
+    .file-button span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .file-button .meta {
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.72rem;
+    }
+
+    .file-button.active,
+    .quick-link.active,
+    .pdf-link.active,
+    .theme-button.active {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, var(--pill), rgba(255, 255, 255, 0.04));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .main {
+      overflow-x: hidden;
+      padding: 28px 34px 36px;
+    }
+
+    .main-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      padding: 20px 24px;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .hero-copy {
+      max-width: 760px;
+    }
+
+    .hero-copy h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+      line-height: 1.02;
+      font-family: var(--font-reading);
+    }
+
+    .hero-copy p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .archive-badge {
+      align-self: flex-start;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--pill);
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      min-width: 220px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .hero-stat {
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .hero-stat .label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 0.74rem;
+      color: var(--soft);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .hero-stat .value {
+      font-size: 1.34rem;
+      font-weight: 700;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 18px;
+    }
+
+    .toolbar,
+    .document-shell,
+    .reader-shell {
+      padding: 18px;
+    }
+
+    .toolbar-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr 1fr;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .toolbar-block {
+      display: grid;
+      gap: 10px;
+    }
+
+    .toolbar-label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .theme-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .theme-button {
+      width: auto;
+      min-width: 80px;
+      padding: 10px 14px;
+      border-radius: 999px;
+    }
+
+    .control-pair {
+      display: grid;
+      gap: 8px;
+    }
+
+    .control-readout {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .document-shell {
+      display: grid;
+      gap: 16px;
+    }
+
+    .doc-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .doc-copy h3 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2vw, 1.9rem);
+      line-height: 1.08;
+      font-family: var(--font-reading);
+    }
+
+    .doc-copy p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .doc-tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .utility-button {
+      width: auto;
+      padding: 11px 14px;
+      border-radius: 12px;
+    }
+
+    .path-box {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      font-family: var(--font-mono);
+      font-size: 0.83rem;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .reader-shell {
+      display: grid;
+      min-height: 68vh;
+    }
+
+    .reader {
+      position: relative;
+      display: grid;
+      min-height: 100%;
+      padding: clamp(18px, 3vw, 38px);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--reader-edge);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent 36%),
+        var(--reader);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      overflow: hidden;
+    }
+
+    .reader::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      pointer-events: none;
+    }
+
+    .reader-inner {
+      position: relative;
+      z-index: 1;
+      width: min(100%, var(--reader-max-width));
+      margin: 0 auto;
+    }
+
+    .reader-state {
+      display: grid;
+      gap: 14px;
+      padding: 24px 0;
+    }
+
+    .reader-state h4 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-family: var(--font-reading);
+    }
+
+    .reader-state p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 1rem;
+    }
+
+    .reader-content {
+      font-family: var(--font-reading);
+      font-size: var(--reader-font-size);
+      line-height: var(--reader-line-height);
+      color: var(--ink);
+      word-break: break-word;
+    }
+
+    .reader-content h1,
+    .reader-content h2,
+    .reader-content h3,
+    .reader-content h4,
+    .reader-content h5,
+    .reader-content h6 {
+      margin: 1.5em 0 0.7em;
+      line-height: 1.12;
+      font-family: var(--font-reading);
+    }
+
+    .reader-content h1:first-child,
+    .reader-content h2:first-child,
+    .reader-content h3:first-child {
+      margin-top: 0;
+    }
+
+    .reader-content p,
+    .reader-content ul,
+    .reader-content ol,
+    .reader-content blockquote,
+    .reader-content pre,
+    .reader-content table {
+      margin: 0 0 1em;
+    }
+
+    .reader-content ul,
+    .reader-content ol {
+      padding-left: 1.35em;
+    }
+
+    .reader-content li + li {
+      margin-top: 0.45em;
+    }
+
+    .reader-content blockquote {
+      padding: 0.9em 1em;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 14px 14px 0;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+    }
+
+    .reader-content code {
+      padding: 0.12em 0.34em;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+
+    .reader-content table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 0.94em;
+    }
+
+    .reader-content th,
+    .reader-content td {
+      padding: 0.78em 0.82em;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .reader-content th {
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.84em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    .reader-content tr:last-child td {
+      border-bottom: none;
+    }
+
+    .reader-content a {
+      color: var(--accent);
+    }
+
+    .inline-file-link {
+      width: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.16em 0.52em;
+      border-radius: 999px;
+      font-size: 0.92em;
+      vertical-align: baseline;
+    }
+
+    .code-block {
+      margin: 1em 0;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(7, 12, 21, 0.48);
+      overflow: hidden;
+      font-family: var(--font-mono);
+    }
+
+    body[data-theme="paper"] .code-block,
+    body[data-theme="day"] .code-block {
+      background: rgba(28, 38, 55, 0.04);
+    }
+
+    .code-block .label {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--soft);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .code-block pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .asset-frame {
+      width: 100%;
+      height: min(78vh, 1000px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--bg-3);
+    }
+
+    .asset-image {
+      display: block;
+      max-width: 100%;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-md);
+    }
+
+    .asset-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .fallback-card {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .fallback-card h4 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-family: var(--font-reading);
+    }
+
+    .fallback-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-item {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .meta-item span {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.78rem;
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .meta-item strong,
+    .meta-item code {
+      font-size: 0.92rem;
+      color: var(--ink);
+      font-family: var(--font-mono);
+    }
+
+    .footer-note {
+      color: var(--soft);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1240px) {
+      .hero-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1060px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-toggle {
+        display: inline-flex;
+      }
+
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: min(92vw, 400px);
+        transform: translateX(-104%);
+        transition: transform 160ms ease;
+        z-index: 40;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        padding: 76px 18px 24px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .summary-grid,
+      .hero-stats,
+      .toolbar-grid,
+      .meta-grid,
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-card h1 {
+        font-size: 1.56rem;
+      }
+
+      .hero,
+      .toolbar,
+      .document-shell,
+      .reader-shell {
+        padding: 16px;
+      }
+
+      .reader {
+        padding: 18px;
+      }
+
+      .doc-tools {
+        width: 100%;
+      }
+
+      .utility-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body data-theme="night">
+  <button class="mobile-toggle" id="mobile-toggle" type="button" aria-label="Toggle navigation">Menu</button>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="stack">
+        <section class="card brand-card">
+          <p class="eyebrow">Campaign Vault</p>
+          <h1>Alfie DnD Reader</h1>
+          <p>Browse the repo, the linked Storm King's archive, and the PDF library without getting bounced into a mess of new tabs.</p>
+        </section>
+
+        <section class="card search-card">
+          <h2 class="section-title">Browse</h2>
+          <div class="search-grid">
+            <input class="search-input" id="search-input" type="search" placeholder="Search files, folders, notes, PDFs">
+            <div class="filter-grid">
+              <select class="filter-select" id="source-filter"></select>
+              <select class="filter-select" id="type-filter"></select>
+            </div>
+            <div class="count-pill" id="visible-count">0 visible files</div>
+          </div>
+        </section>
+
+        <section class="card summary-card">
+          <h2 class="section-title">At A Glance</h2>
+          <div class="summary-grid">
+            <div class="stat">
+              <span class="label">Repo Files</span>
+              <span class="value" id="stat-repo-files">0</span>
+            </div>
+            <div class="stat">
+              <span class="label">Repo PDFs</span>
+              <span class="value" id="stat-repo-pdfs">0</span>
+            </div>
+            <div class="stat">
+              <span class="label">Archive PDFs</span>
+              <span class="value" id="stat-archive-pdfs">0</span>
+            </div>
+            <div class="stat">
+              <span class="label">Folders</span>
+              <span class="value" id="stat-folders">0</span>
+            </div>
+          </div>
+          <p class="small-note" id="archive-note"></p>
+        </section>
+
+        <section class="card quick-card">
+          <h2 class="section-title">Pinned Files</h2>
+          <div class="quick-links" id="quick-links"></div>
+        </section>
+
+        <section class="card pdf-card">
+          <h2 class="section-title">Where The PDFs Are</h2>
+          <div class="location-list" id="pdf-locations"></div>
+        </section>
+
+        <section class="card pdf-card">
+          <h2 class="section-title">PDF Shelves</h2>
+          <div class="pdf-group">
+            <h3 class="group-title">Repository PDFs <span id="repo-pdf-count">0 files</span></h3>
+            <div class="pdf-shelf" id="repo-pdf-shelf"></div>
+          </div>
+          <div class="pdf-group">
+            <h3 class="group-title">Archive PDFs <span id="archive-pdf-count">0 files</span></h3>
+            <div class="pdf-shelf" id="archive-pdf-shelf"></div>
+          </div>
+        </section>
+
+        <section class="card library-card">
+          <h2 class="section-title">Library</h2>
+          <div class="library-list" id="library-groups"></div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="main-grid">
+        <section class="card hero">
+          <div class="hero-top">
+            <div class="hero-copy">
+              <p class="eyebrow">Local Reading Room</p>
+              <h2>One place for handovers, inventories, sheets, and source PDFs.</h2>
+              <p>The reader keeps markdown, code, images, and PDFs inside the same page, while the controls let you switch theme, font, size, spacing, and page width for a more comfortable read.</p>
+            </div>
+            <div class="archive-badge" id="archive-badge"></div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="label">Markdown</span>
+              <span class="value" id="hero-markdown-count">0</span>
+            </div>
+            <div class="hero-stat">
+              <span class="label">Total PDFs</span>
+              <span class="value" id="hero-total-pdf-count">0</span>
+            </div>
+            <div class="hero-stat">
+              <span class="label">Archive Files</span>
+              <span class="value" id="hero-archive-files">0</span>
+            </div>
+            <div class="hero-stat">
+              <span class="label">Visible Now</span>
+              <span class="value" id="hero-visible-count">0</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="workspace">
+          <section class="card toolbar">
+            <div class="toolbar-grid">
+              <div class="toolbar-block">
+                <span class="toolbar-label">Theme</span>
+                <div class="theme-row" id="theme-switch">
+                  <button class="theme-button" type="button" data-theme-choice="night">Night</button>
+                  <button class="theme-button" type="button" data-theme-choice="paper">Paper</button>
+                  <button class="theme-button" type="button" data-theme-choice="day">Day</button>
+                </div>
+              </div>
+
+              <div class="toolbar-block">
+                <label class="toolbar-label" for="font-select">Reading Font</label>
+                <select class="filter-select" id="font-select">
+                  <option value="book">Book Serif</option>
+                  <option value="clean">Clean Sans</option>
+                  <option value="classic">Classic Serif</option>
+                </select>
+              </div>
+
+              <div class="toolbar-block">
+                <div class="control-pair">
+                  <label class="toolbar-label" for="size-range">Text Size</label>
+                  <input class="control-range" id="size-range" type="range" min="15" max="26" step="1" value="18">
+                  <div class="control-readout" id="size-value">18px</div>
+                </div>
+              </div>
+
+              <div class="toolbar-block">
+                <div class="control-pair">
+                  <label class="toolbar-label" for="line-range">Line Spacing</label>
+                  <input class="control-range" id="line-range" type="range" min="1.45" max="2.1" step="0.05" value="1.72">
+                  <div class="control-readout" id="line-value">1.72</div>
+                </div>
+              </div>
+
+              <div class="toolbar-block">
+                <div class="control-pair">
+                  <label class="toolbar-label" for="width-range">Page Width</label>
+                  <input class="control-range" id="width-range" type="range" min="680" max="1120" step="20" value="860">
+                  <div class="control-readout" id="width-value">860px</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card document-shell">
+            <div class="doc-top">
+              <div class="doc-copy">
+                <p class="eyebrow">Current File</p>
+                <h3 id="doc-title">Open a file</h3>
+                <p id="doc-description">Choose any document from the left to load it inside the reader.</p>
+              </div>
+              <div class="doc-tools">
+                <button class="utility-button" id="copy-path" type="button">Copy path</button>
+              </div>
+            </div>
+            <div class="path-box" id="doc-path">No file selected yet.</div>
+            <div class="chip-row" id="doc-chips"></div>
+          </section>
+
+          <section class="card reader-shell">
+            <div class="reader">
+              <div class="reader-inner">
+                <div class="reader-state" id="reader-state">
+                  <h4>Open a campaign document</h4>
+                  <p>This vault now keeps the useful stuff in one place. Markdown renders as readable pages, code stays formatted, images preview in place, and PDFs load inside the reader so you can stay oriented.</p>
+                  <p class="footer-note">Tip: use the PDF shelves if you want the quickest answer to "where are all the PDFs?"</p>
+                </div>
+                <article class="reader-content" id="reader-content" hidden></article>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="site/repo-data.js"></script>
+  <script>
+    const data = window.REPO_DATA || {
+      files: [],
+      folders: [],
+      quickLinks: [],
+      summary: {},
+      sourceArchive: {},
+      pdfLocations: { repo: [], archive: [] }
+    };
+
+    const TYPE_LABELS = {
+      markdown: "Markdown pages",
+      code: "Text and code",
+      pdf: "PDFs",
+      image: "Images",
+      download: "Other files"
+    };
+
+    const GROUP_ORDER = [
+      "Character Canon",
+      "Campaign Inventories",
+      "Campaign Handovers",
+      "Campaign Checkpoints",
+      "Character Sheets",
+      "Reference PDFs",
+      "Reader Snapshots",
+      "Local PDFs",
+      "Local Images",
+      "Repository Audit",
+      "Reader App",
+      "Workspace Files",
+      "Automation",
+      "Reader Data",
+      "Archive Reference PDFs",
+      "Archive Checkpoints",
+      "Archive Character Sheets",
+      "Archive Images",
+      "Archive Files",
+      "Backups and Exports"
+    ];
+
+    const FONT_OPTIONS = {
+      book: '"Georgia", "Cambria", "Times New Roman", serif',
+      clean: '"Aptos", "Segoe UI", Tahoma, sans-serif',
+      classic: '"Palatino Linotype", "Book Antiqua", "Georgia", serif'
+    };
+
+    const state = {
+      query: "",
+      source: "all",
+      type: "all",
+      activeId: null,
+      theme: localStorage.getItem("alfie-reader-theme") || "night",
+      font: localStorage.getItem("alfie-reader-font") || "book",
+      size: Number(localStorage.getItem("alfie-reader-size") || 18),
+      lineHeight: Number(localStorage.getItem("alfie-reader-line") || 1.72),
+      width: Number(localStorage.getItem("alfie-reader-width") || 860)
+    };
+
+    const els = {
+      body: document.body,
+      sidebar: document.getElementById("sidebar"),
+      mobileToggle: document.getElementById("mobile-toggle"),
+      searchInput: document.getElementById("search-input"),
+      sourceFilter: document.getElementById("source-filter"),
+      typeFilter: document.getElementById("type-filter"),
+      visibleCount: document.getElementById("visible-count"),
+      quickLinks: document.getElementById("quick-links"),
+      pdfLocations: document.getElementById("pdf-locations"),
+      repoPdfShelf: document.getElementById("repo-pdf-shelf"),
+      archivePdfShelf: document.getElementById("archive-pdf-shelf"),
+      repoPdfCount: document.getElementById("repo-pdf-count"),
+      archivePdfCount: document.getElementById("archive-pdf-count"),
+      libraryGroups: document.getElementById("library-groups"),
+      statRepoFiles: document.getElementById("stat-repo-files"),
+      statRepoPdfs: document.getElementById("stat-repo-pdfs"),
+      statArchivePdfs: document.getElementById("stat-archive-pdfs"),
+      statFolders: document.getElementById("stat-folders"),
+      archiveNote: document.getElementById("archive-note"),
+      archiveBadge: document.getElementById("archive-badge"),
+      heroMarkdownCount: document.getElementById("hero-markdown-count"),
+      heroTotalPdfCount: document.getElementById("hero-total-pdf-count"),
+      heroArchiveFiles: document.getElementById("hero-archive-files"),
+      heroVisibleCount: document.getElementById("hero-visible-count"),
+      themeSwitch: document.getElementById("theme-switch"),
+      fontSelect: document.getElementById("font-select"),
+      sizeRange: document.getElementById("size-range"),
+      lineRange: document.getElementById("line-range"),
+      widthRange: document.getElementById("width-range"),
+      sizeValue: document.getElementById("size-value"),
+      lineValue: document.getElementById("line-value"),
+      widthValue: document.getElementById("width-value"),
+      docTitle: document.getElementById("doc-title"),
+      docDescription: document.getElementById("doc-description"),
+      docPath: document.getElementById("doc-path"),
+      docChips: document.getElementById("doc-chips"),
+      copyPath: document.getElementById("copy-path"),
+      readerState: document.getElementById("reader-state"),
+      readerContent: document.getElementById("reader-content")
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+
+    function normalizePath(value) {
+      return decodeURIComponent(String(value || ""))
+        .replace(/^\.\/+/, "")
+        .replace(/\\/g, "/")
+        .trim();
+    }
+
+    function prettyFolder(folder, source) {
+      if (!folder || folder === ".") {
+        return source === "Source Archive" ? "archive root" : "repo root";
+      }
+      return folder;
+    }
+
+    function formatDate(value) {
+      if (!value) return "Generated at refresh";
+      return new Date(value).toLocaleString();
+    }
+
+    function formatSize(file) {
+      if (!file) return "-";
+      if (file.dynamicMetadata) return "Generated at refresh";
+      if (typeof file.sizeBytes !== "number") return "-";
+      if (file.sizeBytes < 1024) return `${file.sizeBytes} B`;
+      if (file.sizeBytes < 1024 * 1024) return `${(file.sizeBytes / 1024).toFixed(1)} KB`;
+      return `${(file.sizeBytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function sourceLabel(sourceKey) {
+      return sourceKey === "archive" ? "Source Archive" : "Repository";
+    }
+
+    function groupRank(groupName) {
+      const index = GROUP_ORDER.indexOf(groupName);
+      return index === -1 ? GROUP_ORDER.length + 1 : index;
+    }
+
+    function sourceRank(sourceKey) {
+      return sourceKey === "repo" ? 0 : 1;
+    }
+
+    function sortFiles(files) {
+      return [...files].sort((left, right) => {
+        const sourceCompare = sourceRank(left.sourceKey) - sourceRank(right.sourceKey);
+        if (sourceCompare !== 0) {
+          return sourceCompare;
+        }
+        const groupCompare = groupRank(left.group) - groupRank(right.group);
+        if (groupCompare !== 0) {
+          return groupCompare;
+        }
+        const folderCompare = prettyFolder(left.folder, left.source).localeCompare(prettyFolder(right.folder, right.source));
+        if (folderCompare !== 0) {
+          return folderCompare;
+        }
+        return left.name.localeCompare(right.name);
+      });
+    }
+
+    function getFilteredFiles() {
+      return sortFiles(data.files.filter((file) => {
+        const haystack = `${file.name} ${file.displayPath} ${file.group} ${file.source} ${file.description}`.toLowerCase();
+        const matchesQuery = !state.query || haystack.includes(state.query);
+        const matchesSource = state.source === "all" || file.sourceKey === state.source;
+        const matchesType = state.type === "all" || file.renderMode === state.type;
+        return matchesQuery && matchesSource && matchesType;
+      }));
+    }
+
+    function groupFiles(files) {
+      const groups = new Map();
+
+      files.forEach((file) => {
+        const key = `${file.sourceKey}::${file.group}`;
+        if (!groups.has(key)) {
+          groups.set(key, {
+            key,
+            group: file.group,
+            source: file.source,
+            sourceKey: file.sourceKey,
+            files: []
+          });
+        }
+        groups.get(key).files.push(file);
+      });
+
+      return [...groups.values()].sort((left, right) => {
+        if (left.sourceKey !== right.sourceKey) {
+          return sourceRank(left.sourceKey) - sourceRank(right.sourceKey);
+        }
+        return groupRank(left.group) - groupRank(right.group);
+      });
+    }
+
+    function resolveInternalFile(href) {
+      const raw = normalizePath(href);
+      if (!raw || /^https?:/i.test(raw) || /^mailto:/i.test(raw) || /^file:/i.test(raw) || raw.startsWith("#")) {
+        return null;
+      }
+
+      const normalized = raw.replace(/^Source Archive\//i, "");
+      return data.files.find((file) => {
+        const filePath = normalizePath(file.path);
+        const displayPath = normalizePath(file.displayPath);
+        return filePath.toLowerCase() === normalized.toLowerCase() || displayPath.toLowerCase() === raw.toLowerCase();
+      }) || null;
+    }
+
+    function renderInlineLink(label, href) {
+      const resolved = resolveInternalFile(href);
+      if (resolved) {
+        return `<button class="inline-file-link" type="button" data-inline-file-id="${escapeAttr(resolved.id)}">${escapeHtml(label)}</button>`;
+      }
+
+      return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
+    }
+
+    function parseInline(text) {
+      const placeholders = [];
+      let source = String(text || "");
+
+      function store(html) {
+        const token = `%%INLINE_${placeholders.length}%%`;
+        placeholders.push({ token, html });
+        return token;
+      }
+
+      source = source.replace(/`([^`]+)`/g, (_, code) => store(`<code>${escapeHtml(code)}</code>`));
+      source = source.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => store(renderInlineLink(label, href)));
+
+      let output = escapeHtml(source);
+      placeholders.forEach((entry) => {
+        output = output.replace(entry.token, entry.html);
+      });
+
+      output = output.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      output = output.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      return output;
+    }
+
+    function isTableStart(lines, index) {
+      if (!lines[index] || !lines[index + 1]) return false;
+      if (!lines[index].includes("|")) return false;
+      return /^\s*\|?[\s:-]+\|[\s|:-]*$/.test(lines[index + 1].trim());
+    }
+
+    function renderTable(lines, startIndex) {
+      const headerCells = lines[startIndex].split("|").map((cell) => cell.trim()).filter(Boolean);
+      let index = startIndex + 2;
+      const bodyRows = [];
+
+      while (index < lines.length && lines[index].trim().includes("|")) {
+        const cells = lines[index].split("|").map((cell) => cell.trim()).filter(Boolean);
+        if (cells.length) {
+          bodyRows.push(cells);
+        }
+        index += 1;
+      }
+
+      const thead = `<thead><tr>${headerCells.map((cell) => `<th>${parseInline(cell)}</th>`).join("")}</tr></thead>`;
+      const tbody = `<tbody>${bodyRows.map((row) => `<tr>${row.map((cell) => `<td>${parseInline(cell)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      return { html: `<table>${thead}${tbody}</table>`, nextIndex: index };
+    }
+
+    function renderList(lines, startIndex, ordered) {
+      const pattern = ordered ? /^\s*\d+\.\s+(.*)$/ : /^\s*[-*+]\s+(.*)$/;
+      const tag = ordered ? "ol" : "ul";
+      const items = [];
+      let index = startIndex;
+
+      while (index < lines.length) {
+        const match = lines[index].match(pattern);
+        if (!match) break;
+        items.push(`<li>${parseInline(match[1].trim())}</li>`);
+        index += 1;
+      }
+
+      return { html: `<${tag}>${items.join("")}</${tag}>`, nextIndex: index };
+    }
+
+    function renderCodeBlock(language, code) {
+      const label = language ? escapeHtml(language) : "text";
+      return `
+        <div class="code-block">
+          <div class="label">${label}</div>
+          <pre><code>${escapeHtml(code)}</code></pre>
+        </div>
+      `;
+    }
+
+    function renderMarkdown(markdown) {
+      const lines = String(markdown || "").replace(/\r\n/g, "\n").split("\n");
+      const blocks = [];
+      let index = 0;
+
+      while (index < lines.length) {
+        const line = lines[index];
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+          index += 1;
+          continue;
+        }
+
+        const fenceMatch = line.match(/^```([\w-]*)\s*$/);
+        if (fenceMatch) {
+          const language = fenceMatch[1];
+          const codeLines = [];
+          index += 1;
+          while (index < lines.length && !lines[index].match(/^```\s*$/)) {
+            codeLines.push(lines[index]);
+            index += 1;
+          }
+          index += 1;
+          blocks.push(renderCodeBlock(language, codeLines.join("\n")));
+          continue;
+        }
+
+        const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+        if (headingMatch) {
+          const level = headingMatch[1].length;
+          blocks.push(`<h${level}>${parseInline(headingMatch[2].trim())}</h${level}>`);
+          index += 1;
+          continue;
+        }
+
+        if (isTableStart(lines, index)) {
+          const result = renderTable(lines, index);
+          blocks.push(result.html);
+          index = result.nextIndex;
+          continue;
+        }
+
+        if (/^\s*[-*+]\s+/.test(line)) {
+          const result = renderList(lines, index, false);
+          blocks.push(result.html);
+          index = result.nextIndex;
+          continue;
+        }
+
+        if (/^\s*\d+\.\s+/.test(line)) {
+          const result = renderList(lines, index, true);
+          blocks.push(result.html);
+          index = result.nextIndex;
+          continue;
+        }
+
+        if (/^\s*>\s?/.test(line)) {
+          const quoteLines = [];
+          while (index < lines.length && /^\s*>\s?/.test(lines[index])) {
+            quoteLines.push(lines[index].replace(/^\s*>\s?/, ""));
+            index += 1;
+          }
+          blocks.push(`<blockquote>${renderMarkdown(quoteLines.join("\n"))}</blockquote>`);
+          continue;
+        }
+
+        const paragraphLines = [];
+        while (
+          index < lines.length &&
+          lines[index].trim() &&
+          !lines[index].match(/^```/) &&
+          !lines[index].match(/^(#{1,6})\s+/) &&
+          !lines[index].match(/^\s*[-*+]\s+/) &&
+          !lines[index].match(/^\s*\d+\.\s+/) &&
+          !lines[index].match(/^\s*>\s?/) &&
+          !isTableStart(lines, index)
+        ) {
+          paragraphLines.push(lines[index].trim());
+          index += 1;
+        }
+
+        blocks.push(`<p>${parseInline(paragraphLines.join(" "))}</p>`);
+      }
+
+      return blocks.join("\n");
+    }
+
+    function renderFallback(file) {
+      return `
+        <section class="fallback-card">
+          <h4>${escapeHtml(file.name)}</h4>
+          <p>This file is indexed inside the vault, but it does not have an inline renderer yet. You can still inspect its metadata here and keep browsing without losing your place.</p>
+          <div class="meta-grid">
+            <div class="meta-item">
+              <span>Source</span>
+              <strong>${escapeHtml(file.source)}</strong>
+            </div>
+            <div class="meta-item">
+              <span>Type</span>
+              <strong>${escapeHtml(file.type)}</strong>
+            </div>
+            <div class="meta-item">
+              <span>Folder</span>
+              <code>${escapeHtml(prettyFolder(file.folder, file.source))}</code>
+            </div>
+            <div class="meta-item">
+              <span>Size</span>
+              <strong>${escapeHtml(formatSize(file))}</strong>
+            </div>
+          </div>
+          <p class="footer-note">Path: ${escapeHtml(file.displayPath)}</p>
+        </section>
+      `;
+    }
+
+    function bindInlineFileLinks() {
+      els.readerContent.querySelectorAll("[data-inline-file-id]").forEach((button) => {
+        button.addEventListener("click", () => openFile(button.dataset.inlineFileId));
+      });
+    }
+
+    function showReader() {
+      els.readerState.hidden = true;
+      els.readerContent.hidden = false;
+    }
+
+    function showWelcome() {
+      els.readerState.hidden = false;
+      els.readerContent.hidden = true;
+      state.activeId = null;
+    }
+
+    function renderChips(file) {
+      const chips = [
+        file.source,
+        file.group,
+        file.type,
+        formatSize(file),
+        formatDate(file.lastModified)
+      ];
+
+      els.docChips.innerHTML = chips.map((chip) => `<span class="chip">${escapeHtml(chip)}</span>`).join("");
+    }
+
+    function renderFile(file) {
+      state.activeId = file.id;
+      els.docTitle.textContent = file.name;
+      els.docDescription.textContent = `${file.description} Path: ${file.displayPath}`;
+      els.docPath.textContent = file.displayPath;
+      els.copyPath.dataset.path = file.displayPath;
+      renderChips(file);
+
+      if (file.renderMode === "markdown" && file.textContent) {
+        els.readerContent.innerHTML = renderMarkdown(file.textContent);
+      } else if (file.renderMode === "code" && file.textContent) {
+        const label = file.extension.replace(".", "") || "text";
+        els.readerContent.innerHTML = renderCodeBlock(label, file.textContent);
+      } else if (file.renderMode === "pdf") {
+        els.readerContent.innerHTML = `
+          <iframe class="asset-frame" title="${escapeAttr(file.name)}" src="${escapeAttr(file.fileUrl)}"></iframe>
+          <p class="asset-note">PDF is being shown inside the reader from ${escapeHtml(file.source)}. If your browser blocks local PDFs, the file is still indexed here and the path is above.</p>
+        `;
+      } else if (file.renderMode === "image") {
+        els.readerContent.innerHTML = `
+          <img class="asset-image" src="${escapeAttr(file.fileUrl)}" alt="${escapeAttr(file.name)}">
+          <p class="asset-note">Image preview from ${escapeHtml(file.source)}.</p>
+        `;
+      } else {
+        els.readerContent.innerHTML = renderFallback(file);
+      }
+
+      showReader();
+      bindInlineFileLinks();
+      history.replaceState(null, "", `#${encodeURIComponent(file.id)}`);
+      renderQuickLinks();
+      renderPdfShelves();
+      renderLibrary();
+
+      if (window.innerWidth <= 1060) {
+        els.sidebar.classList.remove("open");
+      }
+    }
+
+    function openFile(fileId) {
+      const file = data.files.find((entry) => entry.id === fileId);
+      if (!file) return;
+      renderFile(file);
+    }
+
+    function applyReaderPreferences() {
+      els.body.setAttribute("data-theme", state.theme);
+      localStorage.setItem("alfie-reader-theme", state.theme);
+      els.themeSwitch.querySelectorAll("[data-theme-choice]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.themeChoice === state.theme);
+      });
+
+      document.documentElement.style.setProperty("--font-reading", FONT_OPTIONS[state.font] || FONT_OPTIONS.book);
+      els.fontSelect.value = state.font;
+      localStorage.setItem("alfie-reader-font", state.font);
+
+      document.documentElement.style.setProperty("--reader-font-size", `${state.size}px`);
+      els.sizeRange.value = String(state.size);
+      els.sizeValue.textContent = `${state.size}px`;
+      localStorage.setItem("alfie-reader-size", String(state.size));
+
+      document.documentElement.style.setProperty("--reader-line-height", String(state.lineHeight));
+      els.lineRange.value = String(state.lineHeight);
+      els.lineValue.textContent = Number(state.lineHeight).toFixed(2);
+      localStorage.setItem("alfie-reader-line", String(state.lineHeight));
+
+      document.documentElement.style.setProperty("--reader-max-width", `${state.width}px`);
+      els.widthRange.value = String(state.width);
+      els.widthValue.textContent = `${state.width}px`;
+      localStorage.setItem("alfie-reader-width", String(state.width));
+    }
+
+    function fillFilters() {
+      const sourceOptions = ["all", ...new Set(data.files.map((file) => file.sourceKey))];
+      els.sourceFilter.innerHTML = sourceOptions.map((source) => {
+        const label = source === "all" ? "All sources" : sourceLabel(source);
+        return `<option value="${source}">${escapeHtml(label)}</option>`;
+      }).join("");
+
+      const renderModes = ["all", "markdown", "pdf", "code", "image", "download"].filter((mode) => {
+        return mode === "all" || data.files.some((file) => file.renderMode === mode);
+      });
+      els.typeFilter.innerHTML = renderModes.map((type) => {
+        const label = type === "all" ? "All view types" : TYPE_LABELS[type] || type;
+        return `<option value="${type}">${escapeHtml(label)}</option>`;
+      }).join("");
+
+      els.sourceFilter.value = state.source;
+      els.typeFilter.value = state.type;
+    }
+
+    function renderQuickLinks() {
+      els.quickLinks.innerHTML = data.quickLinks.map((item) => `
+        <button class="quick-link ${item.id === state.activeId ? "active" : ""}" type="button" data-quick-id="${escapeAttr(item.id)}">
+          ${escapeHtml(item.title)}
+        </button>
+      `).join("");
+
+      els.quickLinks.querySelectorAll("[data-quick-id]").forEach((button) => {
+        button.addEventListener("click", () => openFile(button.dataset.quickId));
+      });
+    }
+
+    function renderPdfLocations() {
+      const repoLocations = (data.pdfLocations && data.pdfLocations.repo) || [];
+      const archiveLocations = (data.pdfLocations && data.pdfLocations.archive) || [];
+      const combined = [...repoLocations, ...archiveLocations];
+
+      els.pdfLocations.innerHTML = combined.map((location) => `
+        <div class="location-row">
+          <div>
+            <strong>${escapeHtml(location.source)}</strong><br>
+            <code>${escapeHtml(prettyFolder(location.folder, location.source))}</code>
+          </div>
+          <strong>${escapeHtml(String(location.count))}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderPdfShelf(files, target, activeId) {
+      target.innerHTML = files.map((file) => `
+        <button class="pdf-link ${file.id === activeId ? "active" : ""}" type="button" data-pdf-id="${escapeAttr(file.id)}">
+          ${escapeHtml(file.name)}
+        </button>
+      `).join("");
+
+      target.querySelectorAll("[data-pdf-id]").forEach((button) => {
+        button.addEventListener("click", () => openFile(button.dataset.pdfId));
+      });
+    }
+
+    function renderPdfShelves() {
+      const repoPdfs = sortFiles(data.files.filter((file) => file.sourceKey === "repo" && file.extension === ".pdf"));
+      const archivePdfs = sortFiles(data.files.filter((file) => file.sourceKey === "archive" && file.extension === ".pdf"));
+
+      els.repoPdfCount.textContent = `${repoPdfs.length} file${repoPdfs.length === 1 ? "" : "s"}`;
+      els.archivePdfCount.textContent = `${archivePdfs.length} file${archivePdfs.length === 1 ? "" : "s"}`;
+      renderPdfShelf(repoPdfs, els.repoPdfShelf, state.activeId);
+      renderPdfShelf(archivePdfs, els.archivePdfShelf, state.activeId);
+    }
+
+    function renderLibrary() {
+      const groups = groupFiles(getFilteredFiles());
+      if (!groups.length) {
+        els.libraryGroups.innerHTML = `
+          <div class="library-group">
+            <div class="file-list" style="padding-top: 10px;">
+              <div class="file-button">
+                <strong>No matching files</strong>
+                <span>Try a broader search or clear one of the filters.</span>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      els.libraryGroups.innerHTML = groups.map((group, index) => `
+        <details class="library-group" ${index < 4 ? "open" : ""}>
+          <summary>
+            <span>${escapeHtml(group.source)}</span>
+            ${escapeHtml(group.group)}
+          </summary>
+          <div class="file-list">
+            ${group.files.map((file) => `
+              <button class="file-button ${file.id === state.activeId ? "active" : ""}" type="button" data-file-id="${escapeAttr(file.id)}">
+                <strong>${escapeHtml(file.name)}</strong>
+                <span>${escapeHtml(file.description)}</span>
+                <span class="meta">${escapeHtml(file.type)} / ${escapeHtml(prettyFolder(file.folder, file.source))}</span>
+              </button>
+            `).join("")}
+          </div>
+        </details>
+      `).join("");
+
+      els.libraryGroups.querySelectorAll("[data-file-id]").forEach((button) => {
+        button.addEventListener("click", () => openFile(button.dataset.fileId));
+      });
+    }
+
+    function applyStats() {
+      const repoFiles = data.files.filter((file) => file.sourceKey === "repo");
+      const archiveFiles = data.files.filter((file) => file.sourceKey === "archive");
+      const repoPdfCount = repoFiles.filter((file) => file.extension === ".pdf").length;
+      const archivePdfCount = archiveFiles.filter((file) => file.extension === ".pdf").length;
+      const visibleCount = getFilteredFiles().length;
+
+      els.statRepoFiles.textContent = String(data.summary.repoFileCount || repoFiles.length);
+      els.statRepoPdfs.textContent = String(data.summary.pdfCount || repoPdfCount);
+      els.statArchivePdfs.textContent = String(data.summary.archivePdfCount || archivePdfCount);
+      els.statFolders.textContent = String(data.summary.repoFolderCount || (data.folders || []).length);
+      els.visibleCount.textContent = `${visibleCount} visible file${visibleCount === 1 ? "" : "s"}`;
+      els.heroMarkdownCount.textContent = String(data.summary.markdownCount || repoFiles.filter((file) => file.extension === ".md").length);
+      els.heroTotalPdfCount.textContent = String(repoPdfCount + archivePdfCount);
+      els.heroArchiveFiles.textContent = String(data.summary.archiveFileCount || archiveFiles.length);
+      els.heroVisibleCount.textContent = String(visibleCount);
+
+      if (data.sourceArchive && data.sourceArchive.found) {
+        els.archiveNote.textContent = `Linked source archive found in Downloads: ${data.sourceArchive.pdfCount || archivePdfCount} PDFs available there.`;
+        els.archiveBadge.textContent = `Source archive linked from Downloads. ${data.sourceArchive.fileCount || archiveFiles.length} files indexed, including ${data.sourceArchive.pdfCount || archivePdfCount} PDFs.`;
+      } else {
+        els.archiveNote.textContent = "No linked source archive was detected.";
+        els.archiveBadge.textContent = "No linked source archive detected. The reader is currently browsing repo files only.";
+      }
+    }
+
+    function bindEvents() {
+      els.searchInput.addEventListener("input", (event) => {
+        state.query = event.target.value.trim().toLowerCase();
+        applyStats();
+        renderLibrary();
+      });
+
+      els.sourceFilter.addEventListener("change", (event) => {
+        state.source = event.target.value;
+        applyStats();
+        renderLibrary();
+      });
+
+      els.typeFilter.addEventListener("change", (event) => {
+        state.type = event.target.value;
+        applyStats();
+        renderLibrary();
+      });
+
+      els.themeSwitch.querySelectorAll("[data-theme-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.theme = button.dataset.themeChoice;
+          applyReaderPreferences();
+        });
+      });
+
+      els.fontSelect.addEventListener("change", (event) => {
+        state.font = event.target.value;
+        applyReaderPreferences();
+      });
+
+      els.sizeRange.addEventListener("input", (event) => {
+        state.size = Number(event.target.value);
+        applyReaderPreferences();
+      });
+
+      els.lineRange.addEventListener("input", (event) => {
+        state.lineHeight = Number(event.target.value);
+        applyReaderPreferences();
+      });
+
+      els.widthRange.addEventListener("input", (event) => {
+        state.width = Number(event.target.value);
+        applyReaderPreferences();
+      });
+
+      els.copyPath.addEventListener("click", async () => {
+        const path = els.copyPath.dataset.path || "";
+        if (!path) return;
+        try {
+          await navigator.clipboard.writeText(path);
+          const original = els.copyPath.textContent;
+          els.copyPath.textContent = "Copied";
+          window.setTimeout(() => {
+            els.copyPath.textContent = original;
+          }, 1200);
+        } catch (error) {
+          els.copyPath.textContent = "Copy failed";
+          window.setTimeout(() => {
+            els.copyPath.textContent = "Copy path";
+          }, 1200);
+        }
+      });
+
+      els.mobileToggle.addEventListener("click", () => {
+        els.sidebar.classList.toggle("open");
+      });
+
+      window.addEventListener("hashchange", () => {
+        const id = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+        if (id) {
+          openFile(id);
+        }
+      });
+    }
+
+    function init() {
+      fillFilters();
+      applyReaderPreferences();
+      renderQuickLinks();
+      renderPdfLocations();
+      renderPdfShelves();
+      applyStats();
+      renderLibrary();
+      bindEvents();
+
+      const hashId = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+      if (hashId && data.files.some((file) => file.id === hashId)) {
+        openFile(hashId);
+        return;
+      }
+
+      const defaultFile = data.quickLinks[0];
+      if (defaultFile) {
+        openFile(defaultFile.id);
+      } else {
+        showWelcome();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alphie's D&D — Storm King's Thunder v3</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+    :root {
+      --bg: #0b0e14;
+      --bg2: #111520;
+      --bg3: #171c2a;
+      --card: #1a2035;
+      --border: #2a3550;
+      --gold: #c9962a;
+      --gold2: #e8b84b;
+      --teal: #3ab8c0;
+      --red: #d94040;
+      --green: #3db87a;
+      --text: #dde3f0;
+      --muted: #7a8aaa;
+      --faint: #3a4560;
+      --shadow: 0 4px 24px rgba(0,0,0,0.6);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    /* ══════════════════ LAYOUT ══════════════════ */
+    .app { display: flex; min-height: 100vh; }
+
+    /* ══════════════════ SIDEBAR ══════════════════ */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1em;
+      color: var(--gold2);
+      letter-spacing: .05em;
+    }
+    .sidebar-logo p { font-size: .8em; color: var(--muted); margin-top: 2px; }
+    .sidebar-logo .status-pill {
+      display: inline-block;
+      margin-top: 6px;
+      background: rgba(58,184,192,.15);
+      border: 1px solid var(--teal);
+      color: var(--teal);
+      font-size: .72em;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .nav-group-title {
+      font-size: .65em;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--faint);
+      padding: 12px 18px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: 'Crimson Text', serif;
+      font-size: .95em;
+      transition: all .15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,.04); }
+    .nav-item.active { color: var(--gold2); border-left-color: var(--gold); background: rgba(201,150,42,.07); }
+    .nav-item .icon { font-size: 1.1em; width: 20px; text-align: center; }
+    .nav-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+    /* ══════════════════ MAIN ══════════════════ */
+    .main { flex: 1; overflow: auto; }
+
+    /* ══════════════════ PANELS ══════════════════ */
+    .panel {
+      display: none;
+      padding: 28px 32px;
+      max-width: 960px;
+      animation: fadeIn .2s ease;
+    }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5em;
+      color: var(--gold2);
+      letter-spacing: .04em;
+      margin-bottom: 4px;
+    }
+    .panel-sub { color: var(--muted); font-size: .9em; margin-bottom: 24px; }
+
+    /* cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1em;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .card p { color: var(--text); font-size: .95em; }
+    .card .meta { color: var(--muted); font-size: .82em; margin-top: 6px; }
+
+    /* 2-col grid */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+
+    /* ══════════════════ STAT BLOCKS ══════════════════ */
+    .stat-block {
+      background: #f8f0d8;
+      color: #1a1005;
+      border: 3px solid #8b6914;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      font-family: 'Crimson Text', serif;
+      box-shadow: inset 0 0 20px rgba(139,105,20,.1);
+    }
+    .stat-block-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15em;
+      color: #5a2d00;
+      border-bottom: 2px solid #8b6914;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+    .stat-block-type { font-style: italic; color: #5a3a00; font-size: .9em; margin-bottom: 8px; }
+    .stat-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+    .stat-pill {
+      background: #8b6914;
+      color: #f8f0d8;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: .82em;
+      font-family: 'Cinzel', serif;
+    }
+    .stat-block table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    .stat-block th { color: #5a2d00; font-size: .78em; text-align: center; padding: 4px; }
+    .stat-block td { text-align: center; padding: 3px; font-size: .95em; font-weight: 600; }
+    .stat-block-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid #c8a840; }
+    .trait-name { font-weight: 600; font-style: italic; }
+    .trait-text { font-size: .92em; }
+
+    /* ══════════════════ QUICK REF TABLES ══════════════════ */
+    table.ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9em;
+      margin-bottom: 16px;
+    }
+    table.ref-table th {
+      background: var(--bg3);
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: .78em;
+      letter-spacing: .06em;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    table.ref-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--faint);
+      vertical-align: top;
+    }
+    table.ref-table tr:hover td { background: rgba(255,255,255,.03); }
+    .badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: .78em;
+      font-family: 'Cinzel', serif;
+    }
+    .badge-gold { background: rgba(201,150,42,.2); color: var(--gold2); border: 1px solid var(--gold); }
+    .badge-teal { background: rgba(58,184,192,.15); color: var(--teal); border: 1px solid var(--teal); }
+    .badge-red  { background: rgba(217,64,64,.15); color: var(--red); border: 1px solid var(--red); }
+    .badge-green{ background: rgba(61,184,122,.15); color: var(--green); border: 1px solid var(--green); }
+
+    /* ══════════════════ SPELL SLOTS ══════════════════ */
+    .slot-tracker {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .slot-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75em;
+      color: var(--gold);
+      transition: all .15s;
+      user-select: none;
+      font-family: 'Cinzel', serif;
+    }
+    .slot-circle.used {
+      background: var(--faint);
+      border-color: var(--faint);
+      color: var(--muted);
+    }
+    .slot-circle:hover:not(.used) { background: rgba(201,150,42,.2); }
+
+    /* ══════════════════ INITIATIVE TRACKER ══════════════════ */
+    .init-entry {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      cursor: grab;
+      transition: all .15s;
+    }
+    .init-entry.current { border-color: var(--gold); background: rgba(201,150,42,.08); }
+    .init-entry.dead { opacity: .4; text-decoration: line-through; }
+    .init-score {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3em;
+      color: var(--gold2);
+      min-width: 36px;
+      text-align: center;
+    }
+    .init-name { flex: 1; font-size: .95em; }
+    .init-hp {
+      font-family: 'Cinzel', serif;
+      color: var(--green);
+      min-width: 60px;
+      text-align: right;
+      font-size: .9em;
+    }
+    .init-hp.low { color: var(--red); }
+    .btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Crimson Text', serif;
+      font-size: .9em;
+      transition: all .15s;
+    }
+    .btn:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-gold { background: var(--gold); border-color: var(--gold); color: #1a0c00; font-weight: 600; }
+    .btn-gold:hover { background: var(--gold2); border-color: var(--gold2); color: #1a0c00; }
+    .btn-red { background: var(--red); border-color: var(--red); color: white; }
+    .btn-sm { padding: 3px 9px; font-size: .82em; }
+    input[type=text], input[type=number], select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-family: 'Crimson Text', serif;
+      font-size: .9em;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--gold); }
+
+    /* ══════════════════ GOLDENFIELDS SECTIONS ══════════════════ */
+    .location-block {
+      border-left: 3px solid var(--gold);
+      padding: 12px 16px;
+      background: var(--card);
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 12px;
+    }
+    .location-block h4 {
+      font-family: 'Cinzel', serif;
+      font-size: .9em;
+      color: var(--gold2);
+      margin-bottom: 6px;
+    }
+    .location-block p { font-size: .92em; color: var(--text); }
+    .location-block .alert {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(217,64,64,.12);
+      border: 1px solid rgba(217,64,64,.3);
+      border-radius: 4px;
+      color: #f08080;
+      font-size: .85em;
+    }
+
+    /* ══════════════════ CONDITIONS ══════════════════ */
+    .condition-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .condition-card.active-cond { border-color: var(--red); background: rgba(217,64,64,.1); }
+    .condition-card h4 { font-family: 'Cinzel', serif; font-size: .88em; color: var(--gold); }
+    .condition-card p { font-size: .82em; color: var(--muted); margin-top: 4px; }
+    .cond-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+
+    /* ══════════════════ MOBILE ══════════════════ */
+    .mobile-bar {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      padding: 4px 0 8px;
+      justify-content: space-around;
+    }
+    .mob-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 10px; cursor: pointer; color: var(--muted); font-size: .7em; transition: color .15s; }
+    .mob-btn.active { color: var(--gold2); }
+    .mob-btn .mob-icon { font-size: 1.3em; }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .mobile-bar { display: flex; }
+      .panel { padding: 16px 16px 80px; }
+    }
+
+    /* ══════════════════ SCROLLBAR ══════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ══════════════════ MISC ══════════════════ */
+    h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.1em; margin: 20px 0 10px; }
+    h3 { font-family: 'Cinzel', serif; color: var(--gold2); font-size: .95em; margin: 14px 0 8px; }
+    .tag { font-size: .72em; padding: 1px 6px; border-radius: 3px; background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .tag-enemy { background: rgba(217,64,64,.15); color: #f08080; border-color: rgba(217,64,64,.4); }
+    .tag-npc   { background: rgba(58,184,192,.15); color: var(--teal); border-color: rgba(58,184,192,.4); }
+    .tag-ally  { background: rgba(61,184,122,.15); color: var(--green); border-color: rgba(61,184,122,.4); }
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .highlight { background: rgba(201,150,42,.12); border: 1px solid rgba(201,150,42,.3); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+    .highlight p { font-size: .92em; }
+    blockquote {
+      border-left: 3px solid var(--gold);
+      padding: 10px 16px;
+      margin: 12px 0;
+      background: rgba(201,150,42,.05);
+      font-style: italic;
+      color: var(--muted);
+      font-size: .92em;
+    }
+    .warning-box {
+      background: rgba(217,64,64,.1);
+      border: 1px solid rgba(217,64,64,.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: .9em;
+      color: #f08080;
+    }
+    .success-box {
+      background: rgba(61,184,122,.1);
+      border: 1px solid rgba(61,184,122,.4);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: .9em;
+      color: var(--green);
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>⚔ Alphie's SKT</h1>
+      <p>Storm King's Thunder — Dubbo Table</p>
+      <span class="status-pill">▶ Ch.2 · Goldenfields incoming</span>
+    </div>
+    <nav>
+      <div class="nav-group-title">Campaign Hub</div>
+      <div class="nav-item active" onclick="show('dashboard',this)"><span class="icon">🏠</span> Dashboard</div>
+      <div class="nav-item" onclick="show('party',this)"><span class="icon">👥</span> Party & Spells</div>
+      <div class="nav-item" onclick="show('initiative',this)"><span class="icon">⚡</span> Initiative Tracker</div>
+      <div class="nav-divider"></div>
+      <div class="nav-group-title">Chapter 2 — Goldenfields</div>
+      <div class="nav-item" onclick="show('goldenfields',this)"><span class="icon">🌾</span> Location Guide</div>
+      <div class="nav-item" onclick="show('attack',this)"><span class="icon">🏹</span> Attack Encounter</div>
+      <div class="nav-item" onclick="show('npcs',this)"><span class="icon">🧑</span> Key NPCs</div>
+      <div class="nav-item" onclick="show('quests',this)"><span class="icon">📜</span> Quests & Rewards</div>
+      <div class="nav-divider"></div>
+      <div class="nav-group-title">Reference</div>
+      <div class="nav-item" onclick="show('conditions',this)"><span class="icon">💀</span> Conditions</div>
+      <div class="nav-item" onclick="show('inventory',this)"><span class="icon">🎒</span> Alphie's Inventory</div>
+    </nav>
+  </aside>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <main class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="panel active" id="panel-dashboard">
+      <div class="panel-title">⚔ Campaign Dashboard</div>
+      <div class="panel-sub">Storm King's Thunder · Dubbo Table · Session checkpoint — Ch.2 begins</div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>📍 Where We Are</h3>
+          <p>Party is completing Ch.1 finale in Nightstone. Long rest tonight. Tomorrow: depart for <strong>Goldenfields</strong> to deliver news of the Xelbrin deaths and bring Rillix the tressym to Miros.</p>
+          <p class="meta">Tower of Zephyros triggers the day after quest accepted.</p>
+        </div>
+        <div class="card">
+          <h3>✅ Active Quest</h3>
+          <p><strong>Goldenfields Quest</strong> — from Morak Ur'gray. Deliver news of the Xelbrins' deaths to their son Miros Xelbrin. Deliver Rillix safely if alive.</p>
+          <p class="meta">Reward: Miros's quest + free room & board at Northfurrow's End.</p>
+        </div>
+        <div class="card">
+          <h3>📦 Open Threads</h3>
+          <p>• Kella conversation at the well (Wren's request)<br>
+             • Lady Velrosa burial at first light<br>
+             • Alphie: summon Ink (Find Familiar ritual)<br>
+             • Letters to House Roane + Daggerford dispatched<br>
+             • Ask Morak to remember three names</p>
+        </div>
+        <div class="card">
+          <h3>⚠ DM Notes</h3>
+          <p>Strict 2014 RAW only. No fudging. Tone: M-rated serious. DM voice: Marcus (calm, dry). Josh rolls his own dice.</p>
+          <p class="meta">Level 3 → recommend Level 4 after Dripping Caves complete.</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <h2>Party HP at a Glance</h2>
+      <div id="hp-dashboard"></div>
+
+      <div class="divider"></div>
+      <h2>Quick Spell Slots (click to toggle used)</h2>
+      <div id="spell-dashboard"></div>
+    </section>
+
+    <!-- ===== PARTY ===== -->
+    <section class="panel" id="panel-party">
+      <div class="panel-title">👥 Party Roster</div>
+      <div class="panel-sub">Level 3 · Post–Battle of Nightstone + cave rescue</div>
+
+      <!-- Alphie -->
+      <div class="stat-block">
+        <div class="stat-block-name">Alphie J. Roane — Human Wizard 3 (Divination)</div>
+        <div class="stat-block-type">LG · Noble · Player: Josh</div>
+        <div class="stat-row">
+          <span class="stat-pill">HP 20</span>
+          <span class="stat-pill">AC 12 / 15 w Mage Armor</span>
+          <span class="stat-pill">Speed 30</span>
+          <span class="stat-pill">Save DC 13</span>
+          <span class="stat-pill">Attack +5</span>
+        </div>
+        <div class="stat-block-section">
+          <table>
+            <tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+            <tr><td>10 (+0)</td><td>14 (+2)</td><td>13 (+1)</td><td>16 (+3)</td><td>14 (+2)</td><td>12 (+1)</td></tr>
+          </table>
+        </div>
+        <div class="stat-block-section">
+          <span class="trait-name">Saves (prof):</span> <span class="trait-text">INT +5, WIS +2</span><br>
+          <span class="trait-name">Skills (prof):</span> <span class="trait-text">Arcana +5, History +5, Investigation +5, Persuasion +3</span><br>
+          <span class="trait-name">Cantrips:</span> <span class="trait-text">Fire Bolt, Mage Hand, Prestidigitation</span><br>
+          <span class="trait-name">Prepared spells:</span> <span class="trait-text">Mage Armor, Shield, Sleep, Magic Missile, Grease (usually)</span><br>
+          <span class="trait-name">Spellbook (2nd):</span> <span class="trait-text">2 of: Misty Step, Mirror Image, Web, See Invis, Detect Thoughts, Hold Person</span><br>
+          <span class="trait-name">Languages:</span> <span class="trait-text">Common, Giant, Elvish</span><br>
+          <span class="trait-name">Portent dice:</span> <span class="trait-text">Both spent (orc fight). Refresh on long rest.</span>
+        </div>
+      </div>
+      <h3>Alphie's Spell Slots</h3>
+      <div id="slots-alphie"></div>
+
+      <!-- Wren -->
+      <div class="stat-block" style="margin-top:20px;">
+        <div class="stat-block-name">Wren — Half-Elf Bard 3 (College of Lore)</div>
+        <div class="stat-block-type">CG · Entertainer · Player: Talia</div>
+        <div class="stat-row">
+          <span class="stat-pill">HP 24</span>
+          <span class="stat-pill">AC 13 leather</span>
+          <span class="stat-pill">Save DC 13</span>
+          <span class="stat-pill">Attack +5</span>
+          <span class="stat-pill">Inspiration d6: 3/3</span>
+        </div>
+        <div class="stat-block-section">
+          <table>
+            <tr><th>STR</th><th>DEX</th><th>CON</th><th>INT</th><th>WIS</th><th>CHA</th></tr>
+            <tr><td>10 (+0)</td><td>14 (+2)</td><td>14 (+2)</td><td>12 (+1)</td><td>13 (+1)</td><td>16 (+3)</td></tr>
+          </table>
+        </div>
+        <div class="stat-block-section">
+          <span class="trait-name">Saves (prof):</span> <span class="trait-text">DEX +4, CHA +5</span><br>
+          <span class="trait-name">Spells known:</span> <span class="trait-text">Sleep, Healing Word, Faerie Fire, Dissonant Whispers, Heroism — NOT Thunderwave</span><br>
+          <span class="trait-name">Cutting Words:</span> <span class="trait-text">Reaction — subtract Bardic Inspiration die from attack/check/damage after roll, before result applied</span>
+        </div>
+      </div>
+      <h3>Wren's Spell Slots</h3>
+      <div id="slots-wren"></div>
+
+      <!-- Dorrin -->
+      <div class="stat-block" style="margin-top:20px;">
+        <div class="stat-block-name">Dorrin Stonebrook — Hill Dwarf Cleric 3 (Life Domain)</div>
+        <div class="stat-block-type">LG · Acolyte of Berronar Truesilver · Player: Ben</div>
+        <div class="stat-row">
+          <span class="stat-pill">HP 30</span>
+          <span class="stat-pill">AC 18 chain + shield</span>
+          <span class="stat-pill">Speed 25</span>
+          <span class="stat-pill">Save DC 13</span>
+          <span class="stat-pill">Attack +5</span>
+        </div>
+        <div class="stat-block-section">
+          <span class="trait-name">Saves (prof):</span> <span class="trait-text">WIS +5, CHA +2</span><br>
+          <span class="trait-name">Skills:</span> <span class="trait-text">Insight +5, Medicine +5, Persuasion +2, Religion +2</span><br>
+          <span class="trait-name">Slots state (post-caves, pre-long rest):</span> <span class="trait-text">0/4 first-level, 1/2 second-level</span>
+        </div>
+      </div>
+      <h3>Dorrin's Spell Slots</h3>
+      <div id="slots-dorrin"></div>
+
+      <div class="success-box" style="margin-top:16px;">
+        🔄 All slots restore on long rest tonight in Nightstone.
+      </div>
+    </section>
+
+    <!-- ===== INITIATIVE ===== -->
+    <section class="panel" id="panel-initiative">
+      <div class="panel-title">⚡ Initiative Tracker</div>
+      <div class="panel-sub">Add combatants, sort, track HP and turns</div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" id="init-name" placeholder="Name / Monster" style="width:160px;">
+        <input type="number" id="init-roll" placeholder="Init" min="1" max="30" style="width:70px;">
+        <input type="number" id="init-hp" placeholder="HP" min="0" style="width:70px;">
+        <select id="init-type">
+          <option value="pc">PC</option>
+          <option value="ally">NPC Ally</option>
+          <option value="enemy">Enemy</option>
+        </select>
+        <button class="btn btn-gold" onclick="addInit()">Add</button>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+        <button class="btn" onclick="sortInit()">⬆ Sort by Initiative</button>
+        <button class="btn" onclick="nextTurn()">▶ Next Turn</button>
+        <button class="btn btn-red btn-sm" onclick="clearInit()">✕ Clear All</button>
+      </div>
+
+      <div id="init-round" style="font-family:'Cinzel',serif; color:var(--gold); font-size:.85em; margin-bottom:12px;"></div>
+      <div id="init-list"></div>
+
+      <div class="divider"></div>
+      <h2>Quick-Add Goldenfields Enemies</h2>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="quickAdd('Hill Giant (Lob/Ogg)', 20, 105, 'enemy')">🏔 Hill Giant (105hp)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Ogre', 18, 59, 'enemy')">👹 Ogre (59hp)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Bugbear', 15, 27, 'enemy')">🐻 Bugbear (27hp)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Goblin', 15, 7, 'enemy')">👺 Goblin (7hp)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Miros Xelbrin', 14, 11, 'ally')">🍺 Miros (NPC)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Naxene Drathkala', 13, 40, 'ally')">🧙 Naxene (NPC)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Lifferlas (Awakened Tree)', 13, 135, 'ally')">🌳 Lifferlas (NPC)</button>
+        <button class="btn btn-sm" onclick="quickAdd('Oren Yogilvy', 12, 7, 'ally')">🎵 Oren (NPC)</button>
+      </div>
+    </section>
+
+    <!-- ===== GOLDENFIELDS ===== -->
+    <section class="panel" id="panel-goldenfields">
+      <div class="panel-title">🌾 Goldenfields — Location Guide</div>
+      <div class="panel-sub">The Granary of the North · Walled temple-farm of Chauntea · ~5,000 residents</div>
+
+      <div class="highlight">
+        <p><strong>Overview:</strong> Huge walled temple-farm run by Abbot Ellardin Darovik (Emerald Enclave). 60-ft outer wall, 20-ft inner side. South gatehouse entrance. Scouts at watch posts. Scale wall DC 15 Athletics (eroded mortar provides handholds). More than 20 square miles of tillage.</p>
+      </div>
+
+      <h2>Key Locations</h2>
+      <div class="location-block">
+        <h4>G1 — Gatehouse (South wall)</h4>
+        <p>Three shifts. Each has priest, 4 acolytes, hired mage, 10 scouts, 30 guards. Gates: AC 16, 500 HP, damage threshold 10. Castellan Hantanus Tarm (boorish, no military skill). All wagons searched before entry.</p>
+      </div>
+      <div class="location-block">
+        <h4>G2 — Watch Posts (perimeter)</h4>
+        <p>30 scouts per post, 20 on duty, 10 resting. 12 on parapet facing out, 8 patrol walls in pairs. Alarm: strike pagoda gong → heard 2 miles, cascades to other posts. Too far to hear Oren's shout from the town.</p>
+      </div>
+      <div class="location-block">
+        <h4>G6 — Town (concentric longhouses around central square)</h4>
+        <p>Mostly human commoners. Grove of trees south of town has 3 young treants (awaken to defend abbey). Lifferlas (awakened tree) lives here — old, knows stories, loves children.</p>
+      </div>
+      <div class="location-block">
+        <h4>G7 — Harvesthome Abbey</h4>
+        <p>Largest building. Black bears Darlow and Tilbee wander inside. Abbot leads prayers 9am, noon, 3pm, 6pm. Acolyte Zi Liang patrols outer walls when off-duty. No guards inside, just acolytes.</p>
+        <div class="alert">⚠ Hill Giants Lob & Ogg eventually head here during the attack.</div>
+      </div>
+      <div class="location-block">
+        <h4>G8 — Northfurrow's End (large inn, north of town)</h4>
+        <p>Run by Miros Xelbrin (party's quest contact). 3-storey stone inn. Free room & board for Emerald Enclave members. Naxene Drathkala (mage) in suite above stable house. Oren Yogilvy (halfling bard) lives here. Goldengulp beer.</p>
+        <div class="alert">⚠ Party stays here. Attack begins when Oren shouts the alarm from outside.</div>
+      </div>
+      <div class="location-block">
+        <h4>G9 — Goldengulp Brewery + Dragon's Spire tower</h4>
+        <p>Captain of Guard Strog Thunderblade HQ. Four stories, flat roof with green marble battlements. Strog is fat, lazy, sleeps late. Guards at base and top. Brewery locked at night (DC 15 Dex to pick).</p>
+        <div class="alert">⚠ Too far to hear Oren's alarm. Guards there do NOT respond initially.</div>
+      </div>
+      <div class="location-block">
+        <h4>G13 — Wheat Fields (eastern side)</h4>
+        <p>Goblins and bugbears enter here at point X on map, undetected (Strog failed to brief guards). 10-ft tall stalks in season. Hill Howlers gang gets LOST here and emerge near G4 grain towers by mistake.</p>
+      </div>
+
+      <div class="divider"></div>
+      <h2>Useful Tactical Notes</h2>
+      <table class="ref-table">
+        <tr><th>Gate</th><th>AC</th><th>HP</th><th>Notes</th></tr>
+        <tr><td>Gatehouse outer/inner</td><td>16</td><td>500</td><td>Dmg threshold 10 — immune poison/psychic</td></tr>
+        <tr><td>Watch post storeroom</td><td>—</td><td>—</td><td>DC 15 Dex thieves' tools to unlock</td></tr>
+        <tr><td>Outer wall</td><td>—</td><td>—</td><td>DC 15 Athletics to scale (eroded mortar)</td></tr>
+        <tr><td>Barred city gate (Bryn Shander ref)</td><td>15</td><td>200</td><td>DC 28 Strength to force open</td></tr>
+      </table>
+    </section>
+
+    <!-- ===== ATTACK ENCOUNTER ===== -->
+    <section class="panel" id="panel-attack">
+      <div class="panel-title">🏹 Attack on Goldenfields</div>
+      <div class="panel-sub">Three monster gangs — triggered by Oren's shout at night</div>
+
+      <div class="warning-box">
+        ⚔ <strong>Setup:</strong> Characters are at Northfurrow's End (G8). Oren shouts the alarm. Low mist in gardens. Three monster gangs already inside the wall.
+      </div>
+
+      <h2>Monster Gangs Inside the Wall</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>🐻 Moon Biters</h3>
+          <p>2 ogres + 4 bugbears + 10 goblins → <strong>heading for animal pens (G5)</strong></p>
+        </div>
+        <div class="card">
+          <h3>🗡 Eye Stabbers</h3>
+          <p>2 ogres + 4 bugbears + 10 goblins → <strong>heading for town (G6)</strong> — Oren spots these first</p>
+        </div>
+        <div class="card">
+          <h3>🌾 Hill Howlers</h3>
+          <p>2 ogres + 4 bugbears + 10 goblins → <strong>lost in wheat fields (G13)</strong>, emerge near G4 grain towers, then head for abbey (G7)</p>
+        </div>
+        <div class="card">
+          <h3>🏔 Giants Lob & Ogg</h3>
+          <p>Outside wall with sacks, waiting for food thrown over. <strong>After bell rings: climb in instead of fleeing</strong>. Head for abbey without greatclubs. Surrender at ≤15hp.</p>
+        </div>
+      </div>
+
+      <h2>Outside the Wall (still a threat)</h2>
+      <div class="card">
+        <p>4 more hill giants + 6 ogres with goblin huckers + 30 goblins lurk outside. After bell rings, ogres advance to 120 ft and begin hurling goblins over the wall.</p>
+      </div>
+
+      <h2>Goblin Hucker Stats</h2>
+      <div class="stat-block">
+        <div class="stat-block-name">Goblin Hucker (portable trebuchet worn by ogre)</div>
+        <div class="stat-block-type">Range 150/600 ft · Cannot hit targets within 30 ft of hucker</div>
+        <div class="stat-block-section">
+          <span class="trait-name">Attack:</span> <span class="trait-text">+3 to hit</span><br>
+          <span class="trait-name">Damage:</span> <span class="trait-text">5 (2d4) bludgeoning — OR — 10 (4d4) piercing if goblin wears spiked helmet</span><br>
+          <span class="trait-name">Goblin takes:</span> <span class="trait-text">1d6 bludgeoning per 10 ft traveled (max 20d6)</span><br>
+          <span class="trait-name">Load:</span> <span class="trait-text">Action to load (goblin can load itself). Action to aim and fire.</span>
+        </div>
+      </div>
+
+      <h2>Key Monster Stats (quick ref)</h2>
+      <table class="ref-table">
+        <tr><th>Monster</th><th>AC</th><th>HP</th><th>Attack</th><th>Damage</th><th>Notable</th></tr>
+        <tr>
+          <td><span class="tag tag-enemy">Hill Giant</span> Lob / Ogg</td>
+          <td>13</td><td>105</td>
+          <td>+8 melee</td>
+          <td>18 (3d8+5) greatclub · Unarmed 12 (3d4+5) if inside</td>
+          <td>Surrender ≤15hp. No clubs inside wall. Blubbering if intimidated (DC 15).</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-enemy">Ogre</span></td>
+          <td>11</td><td>59</td>
+          <td>+6 melee</td>
+          <td>13 (2d8+4) greatclub</td>
+          <td>Goblin hucker ogres: +3 ranged, 150/600 ft</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-enemy">Bugbear</span></td>
+          <td>16</td><td>27</td>
+          <td>+4 melee / +2 ranged</td>
+          <td>11 (2d6+4) morningstar; Surprise: +7 (2d6)</td>
+          <td>Brute: extra d8 with melee weapon. Surprise attack extra 2d6.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-enemy">Goblin</span></td>
+          <td>15</td><td>7</td>
+          <td>+4 melee / +4 ranged</td>
+          <td>5 (1d6+2) scimitar / 5 (1d6+2) bow</td>
+          <td>Nimble Escape: Disengage or Hide as bonus action.</td>
+        </tr>
+      </table>
+
+      <div class="success-box">
+        🔔 <strong>Bell mechanic:</strong> If the abbey bell hasn't rung after the 2nd gang is defeated, the Abbot rings it. Bell panics all remaining inside — they flee for the wall. Lob & Ogg alone ignore this and keep pushing toward the abbey.
+      </div>
+
+      <h2>Lob & Ogg Intimidation (DC 15)</h2>
+      <div class="card">
+        <p>If reduced to 15hp or fewer, each surrenders and sobs. DC 15 Charisma (Intimidation) reveals:</p>
+        <p>• "Guh want food." • "Me get food for Guh." • "Guh big. Real big. Bigger than me." • "Grudd Haug. Home."</p>
+        <p class="meta">⚠ Neither giant can navigate. Attempting to follow them to Grudd Haug leads the party lost in the Forlorn Hills. They are too stupid to find their way back.</p>
+      </div>
+
+      <h2>Treasure (per monster)</h2>
+      <table class="ref-table">
+        <tr><th>Monster</th><th>Treasure</th></tr>
+        <tr><td>Hill Giant</td><td>1 sack: 1d4 mundane items (Giant's Bag table) + 1d4−1 art objects worth 250 gp each</td></tr>
+        <tr><td>Bugbear</td><td>Pouch: 1d6 gemstones worth 10 gp each</td></tr>
+        <tr><td>Goblin</td><td>1d6 cp + worthless belongings (skull bowls, woven beards, halfling ear necklaces)</td></tr>
+        <tr><td>Ogre</td><td>No treasure</td></tr>
+      </table>
+    </section>
+
+    <!-- ===== NPCs ===== -->
+    <section class="panel" id="panel-npcs">
+      <div class="panel-title">🧑 Key NPCs — Goldenfields</div>
+      <div class="panel-sub">Special NPCs (player-run in battle) + major contacts</div>
+
+      <div class="highlight">
+        <p>Each player runs one special NPC during the battle in addition to their PC. Survives = unlocks that NPC's quest. NPCs act on same initiative as controlling player's character.</p>
+      </div>
+
+      <h2>Player-Controlled NPCs (Battle)</h2>
+
+      <div class="stat-block">
+        <div class="stat-block-name">Miros Xelbrin — Human Commoner (innkeeper)</div>
+        <div class="stat-block-type">Starts at G8 (inside the inn) · Quest target for party</div>
+        <div class="stat-row"><span class="stat-pill">AC 10</span><span class="stat-pill">HP 11</span><span class="stat-pill">No prof bonus</span></div>
+        <div class="stat-block-section">
+          <span class="trait-name">Personality:</span> <span class="trait-text">Retired carnival attraction ("the Yeti"). Staunch Emerald Enclave supporter. Tolerates no rabble. Can spot adventurers a mile away. Has tried courting Naxene (ignored).</span><br>
+          <span class="trait-name">Ideal:</span> <span class="trait-text">The land provides, and we must protect it.</span><br>
+          <span class="trait-name">Bond:</span> <span class="trait-text">Goldenfields is his home and he will fight for it.</span><br>
+          <span class="trait-name">Flaw:</span> <span class="trait-text">Stubborn — refuses to retreat even when outmatched.</span>
+        </div>
+      </div>
+
+      <div class="stat-block" style="margin-top:16px;">
+        <div class="stat-block-name">Naxene Drathkala — Human Mage (Watchful Order attache)</div>
+        <div class="stat-block-type">Starts at G8 (stable house suite) · Lords' Alliance spy for Lady Laeral Silverhand</div>
+        <div class="stat-row"><span class="stat-pill">AC 13 (Mage Armor)</span><span class="stat-pill">HP ~40</span><span class="stat-pill">Spell DC 14</span><span class="stat-pill">Attack +6</span></div>
+        <div class="stat-block-section">
+          <span class="trait-name">Personality:</span> <span class="trait-text">Quiet, bookish, ambitious. Convinced good dragons are the key to fighting giants. Urges party to find a powerful good dragon.</span><br>
+          <span class="trait-name">Quest reward:</span> <span class="trait-text">Recommends Chazlauth Yarghorn in Waterdeep (dragon expert). Leads to potions of poison resistance (one is mislabeled — actually a potion of poison).</span>
+        </div>
+      </div>
+
+      <div class="stat-block" style="margin-top:16px;">
+        <div class="stat-block-name">Lifferlas — Awakened Tree (oldest Goldenfields resident)</div>
+        <div class="stat-block-type">Starts at G6 (grove of trees) · Created by long-dead druid Aerglas</div>
+        <div class="stat-row"><span class="stat-pill">AC 13</span><span class="stat-pill">HP 135</span><span class="stat-pill">Speaks Common</span></div>
+        <div class="stat-block-section">
+          <span class="trait-name">Quest:</span> <span class="trait-text">Find its creator Aerglas, who left for Shadowtop Cathedral 30 years ago following the Dessarin River toward Turlang the treant.</span>
+        </div>
+      </div>
+
+      <div class="stat-block" style="margin-top:16px;">
+        <div class="stat-block-name">Oren Yogilvy — Halfling Bard (musician)</div>
+        <div class="stat-block-type">Starts outside G8 (wandering, half-drunk) · SPOTS the Eye Stabbers first</div>
+        <div class="stat-row"><span class="stat-pill">AC 12</span><span class="stat-pill">HP 7</span><span class="stat-pill">Charisma +3</span></div>
+        <div class="stat-block-section">
+          <span class="trait-name">Role:</span> <span class="trait-text">Sounds the initial alarm with his powerful lungs. After that he is fragile. Quest reward: escort him to Bargewright Inn (via Shalvus's chain).</span>
+        </div>
+      </div>
+
+      <div class="stat-block" style="margin-top:16px;">
+        <div class="stat-block-name">Shalvus Martholio — Human Shepherd (Zhentarim spy)</div>
+        <div class="stat-block-type">Starts at G8 (inside the inn) · Wolf in sheep's clothing</div>
+        <div class="stat-row"><span class="stat-pill">AC 12</span><span class="stat-pill">HP ~13</span></div>
+        <div class="stat-block-section">
+          <span class="trait-name">Secret:</span> <span class="trait-text">Zhentarim spy for Nalaskur Thaelond. Scouting how easily the Black Network could control Goldenfields. Players likely don't know this.</span><br>
+          <span class="trait-name">Quest if alive:</span> <span class="trait-text">Asks party to escort him to Bargewright Inn to report. Leads to Nalaskur's beer wagon delivery quest and Black Network contact chain.</span>
+        </div>
+      </div>
+
+      <div class="stat-block" style="margin-top:16px;">
+        <div class="stat-block-name">Zi Liang — Human Acolyte of Chauntea</div>
+        <div class="stat-block-type">Starts at G7 (abbey) · Emerald Enclave sympathizer · Beneficiary of large inheritance</div>
+        <div class="stat-row"><span class="stat-pill">AC 13 (Mage Armor)</span><span class="stat-pill">HP ~18</span><span class="stat-pill">Spell DC 13</span></div>
+        <div class="stat-block-section">
+          <span class="trait-name">Personality:</span> <span class="trait-text">Has scolded Abbot repeatedly for poor military leadership. Patrols outer walls on her own initiative. Ascetic lifestyle despite her inheritance.</span><br>
+          <span class="trait-name">Quest if alive:</span> <span class="trait-text">Gives party a black pearl pendant (750 gp) to deliver to Cauldar Marskyl at House Thann, Waterdeep → unlocks 2 magic items from Magic Item Table C.</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <h2>Other Key NPCs</h2>
+      <table class="ref-table">
+        <tr><th>Name</th><th>Role</th><th>Notes</th></tr>
+        <tr><td>Ellardin Darovik</td><td>Abbot of Goldenfields</td><td>NG priest. Generous, avoids confrontation. Rings abbey bell if needed. Will thank characters after battle.</td></tr>
+        <tr><td>Strog Thunderblade</td><td>Captain of the Guard</td><td>NG half-orc veteran. Fat, lazy. Sleeps late, leaves tower once at 3pm. Did NOT brief guards or prepare for 2nd attack. Takes credit for the party's win.</td></tr>
+        <tr><td>Hantanus Tarm</td><td>Gatehouse Castellan</td><td>LN noble. Boorish, no military experience. Purely political post.</td></tr>
+        <tr><td>Sevembra Tumbleleaf</td><td>Earth Mother's Bounty (G3)</td><td>LN halfling druid. Sells seeds and cornucopias. Gives free samples.</td></tr>
+      </table>
+    </section>
+
+    <!-- ===== QUESTS ===== -->
+    <section class="panel" id="panel-quests">
+      <div class="panel-title">📜 Quests & Rewards — Goldenfields</div>
+      <div class="panel-sub">Each surviving NPC = one quest + reward. Choose carefully who to protect.</div>
+
+      <div class="warning-box">
+        ⚠ NPC must survive the battle to unlock their quest. If an NPC dies, that quest and its reward is lost — no revivify without a 3rd-level spell slot.
+      </div>
+
+      <table class="ref-table">
+        <tr><th>NPC</th><th>Quest</th><th>Reward</th></tr>
+        <tr>
+          <td><span class="tag tag-ally">Miros Xelbrin</span></td>
+          <td>Travel to Amphail, deliver regards to Arleosa Starhenge at the Stag-Horned Flagon tavern.</td>
+          <td>Arleosa offers drinks + wooden ring (favor from Keltar Dardragon ghost → points to Old Tower in wilderness with magic items inside)</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ally">Naxene Drathkala</span></td>
+          <td>Go to Waterdeep, find dragon expert Chazlauth Yarghorn (North Ward, tall stone house with tower).</td>
+          <td>Potions of poison resistance × party size — WARNING: one is a mislabeled potion of poison (random recipient). Also leads to Kryptgarden Forest / Old Gnawbone encounter (Ch.3).</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ally">Lifferlas</span></td>
+          <td>Find moon elf druid Aerglas — last seen heading to Shadowtop Cathedral (Ch.3), following Dessarin River to find treant Turlang.</td>
+          <td>Turlang (after 3-day wait) gives 2 awakened trees + 1 awakened shrub as companions. Tharra Shyndle leads party safely to Evermoor Way. If friendly: pouch of 1d4+4 silver berries (each = potion of invisibility). Then Magic Item Tables F + B×2 via Quinn Nardrosz.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ally">Shalvus Martholio</span></td>
+          <td>Escort him to Bargewright Inn for his Black Network debrief.</td>
+          <td>Nalaskur Thaelond offers free room + board. Then beer wagon delivery quest (Troll in Flames, Mornbryn's Shield). Success → anonymous Zhentarim bundle next time party visits Black Network town.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ally">Zi Liang</span></td>
+          <td>Deliver her black pearl pendant (750 gp) to Cauldar Marskyl, head butler of House Thann, Waterdeep.</td>
+          <td>Cauldar retrieves old wooden trunk from attic → 2 magic items from Magic Item Table C for the party.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-ally">Oren Yogilvy</span></td>
+          <td>Check on his sister Lily at the Happy Cow tavern in Daggerford. Deliver letter. Help the Hardcheese halfling moneylending family vs. Zhentarim.</td>
+          <td>Cask of Goldengulp (15 gp) + cornucopia of fresh food + bottle of winterberry wine (10 gp). Also uncovers Zhentarim influence in Daggerford.</td>
+        </tr>
+      </table>
+
+      <div class="divider"></div>
+      <h2>After the Battle</h2>
+      <div class="card">
+        <h3>DM Notes</h3>
+        <p>• Abbot thanks party profusely and ensures they're well-supplied when departing.<br>
+           • Strog takes credit — party can demand his resignation (Abbot will "give it serious thought").<br>
+           • Each NPC approaches characters after battle to give quest.<br>
+           • Captured monsters: put to death by Strog's order.</p>
+      </div>
+      <div class="highlight">
+        <p><strong>Progression:</strong> Characters should hit Level 4 after completing Goldenfields (if not already after Dripping Caves). Tower of Zephyros appears the day after accepting Morak's quest — already triggered if party is en route.</p>
+      </div>
+    </section>
+
+    <!-- ===== CONDITIONS ===== -->
+    <section class="panel" id="panel-conditions">
+      <div class="panel-title">💀 Conditions Reference</div>
+      <div class="panel-sub">Tap a condition to mark it as active</div>
+
+      <div class="cond-grid" id="cond-grid"></div>
+    </section>
+
+    <!-- ===== INVENTORY ===== -->
+    <section class="panel" id="panel-inventory">
+      <div class="panel-title">🎒 Alphie's Inventory</div>
+      <div class="panel-sub">As of Checkpoint 5 — post Dripping Caves, Nightstone</div>
+
+      <div class="warning-box">💰 GP: 0 (paid 25 gp earnest for horse restitution)</div>
+
+      <h2>Worn & Carried</h2>
+      <table class="ref-table">
+        <tr><th>Item</th><th>Qty</th><th>Notes</th></tr>
+        <tr><td>Spellbook</td><td>1</td><td>Mage Armor, Shield, Sleep, Magic Missile, Detect Magic (ritual), Find Familiar (ritual), Grease, Feather Fall + 2 level-2 spells TBD</td></tr>
+        <tr><td>Component pouch</td><td>1</td><td>10 gp worth of components for Find Familiar</td></tr>
+        <tr><td>Quarterstaff</td><td>1</td><td></td></tr>
+        <tr><td>Daggers</td><td>2</td><td></td></tr>
+        <tr><td>Scholar's pack / backpack</td><td>1</td><td>Book, parchment, ink, pen inside</td></tr>
+        <tr><td>Calligrapher's supplies</td><td>1 set</td><td></td></tr>
+        <tr><td>Dragonchess set</td><td>1</td><td></td></tr>
+        <tr><td>Fine/noble clothes + robe</td><td>1 set each</td><td></td></tr>
+        <tr><td>Fur warm clothes</td><td>1 set</td><td>Good for Icewind Dale / north travel</td></tr>
+        <tr><td>Signet ring</td><td>1</td><td>Roane family seal</td></tr>
+        <tr><td>Scroll of pedigree / noble papers</td><td>1</td><td></td></tr>
+        <tr><td>Roane wax / seal materials</td><td>1 set</td><td></td></tr>
+        <tr><td>Letters / promissory documents</td><td>—</td><td>Nightstone restitution & relief letters</td></tr>
+        <tr><td>Rope (hemp)</td><td>50 ft</td><td>In camp gear</td></tr>
+        <tr><td>Ledger book</td><td>1</td><td></td></tr>
+        <tr><td>Familiar: Ink (raven)</td><td>—</td><td>Not yet summoned. 1-hr ritual, 10 gp components ready.</td></tr>
+      </table>
+
+      <h2>Wagon — Trade Goods</h2>
+      <table class="ref-table">
+        <tr><th>Item</th><th>Qty</th><th>Status</th></tr>
+        <tr><td>Roane dry apple cider (20L cask)</td><td>1</td><td>In wagon</td></tr>
+        <tr><td>Roane pear-apple cider (20L cask)</td><td>1</td><td>In wagon</td></tr>
+        <tr><td>Roane dry apple cider (20L cask)</td><td>1</td><td><span class="badge badge-red">Given to Morak</span> (village supper)</td></tr>
+        <tr><td>Roane spiced apple cider (20L cask)</td><td>1</td><td><span class="badge badge-red">Given to Morak</span> (village supper)</td></tr>
+        <tr><td>Small sealed sample bottles (750ml)</td><td>6</td><td>In wagon</td></tr>
+      </table>
+
+      <h2>Wagon — Food Supplies</h2>
+      <table class="ref-table">
+        <tr><th>Item</th><th>Qty</th><th>Notes</th></tr>
+        <tr><td>Hard travel biscuits</td><td>24</td><td>~8 person-days rationed</td></tr>
+        <tr><td>Dried apples</td><td>2 sacks</td><td></td></tr>
+        <tr><td>Smoked ham strips</td><td>1 bundle</td><td>~4 person-days</td></tr>
+        <tr><td>Dried beef</td><td>1 bundle</td><td>~4 person-days</td></tr>
+        <tr><td>Oat cakes</td><td>12</td><td></td></tr>
+        <tr><td>Walnuts</td><td>1 sack (~2 lb)</td><td></td></tr>
+        <tr><td>Honey jar</td><td>1</td><td>Half full</td></tr>
+        <tr><td>Salt pouch + waterskins (×4)</td><td>1 each</td><td>Full, refilled in Nightstone</td></tr>
+        <tr><td>Horse oats</td><td>1 sack</td><td>~1 day for mounts</td></tr>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<!-- ══ MOBILE NAV ══ -->
+<div class="mobile-bar">
+  <div class="mob-btn active" onclick="show('dashboard',this,true)"><span class="mob-icon">🏠</span>Home</div>
+  <div class="mob-btn" onclick="show('party',this,true)"><span class="mob-icon">👥</span>Party</div>
+  <div class="mob-btn" onclick="show('initiative',this,true)"><span class="mob-icon">⚡</span>Init</div>
+  <div class="mob-btn" onclick="show('goldenfields',this,true)"><span class="mob-icon">🌾</span>Location</div>
+  <div class="mob-btn" onclick="show('attack',this,true)"><span class="mob-icon">🏹</span>Battle</div>
+  <div class="mob-btn" onclick="show('npcs',this,true)"><span class="mob-icon">🧑</span>NPCs</div>
+</div>
+
+<script>
+// ══════════════════════════════
+// NAVIGATION
+// ══════════════════════════════
+function show(id, el, isMobile) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+
+  if (isMobile) {
+    document.querySelectorAll('.mob-btn').forEach(b => b.classList.remove('active'));
+  } else {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  }
+  if (el) el.classList.add('active');
+}
+
+// ══════════════════════════════
+// SPELL SLOTS
+// ══════════════════════════════
+const slotState = {
+  alphie: { '1st': { total: 4, used: 2 }, '2nd': { total: 2, used: 0 } },
+  wren:   { '1st': { total: 4, used: 2 }, '2nd': { total: 2, used: 0 } },
+  dorrin: { '1st': { total: 4, used: 4 }, '2nd': { total: 2, used: 1 } }
+};
+
+function renderSlots(char, targetId) {
+  const div = document.getElementById(targetId);
+  if (!div) return;
+  let html = '';
+  for (const [level, data] of Object.entries(slotState[char])) {
+    html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <span style="font-family:'Cinzel',serif;font-size:.78em;color:var(--muted);width:50px;">${level}</span>
+      <div class="slot-tracker">`;
+    for (let i = 0; i < data.total; i++) {
+      const used = i < data.used;
+      html += `<div class="slot-circle${used?' used':''}" onclick="toggleSlot('${char}','${level}',${i})" title="${used?'Used':'Available'}">${used?'✕':'✦'}</div>`;
+    }
+    html += `</div><span style="font-size:.8em;color:var(--muted);">${data.total - data.used}/${data.total} left</span>`;
+    html += `</div>`;
+  }
+  div.innerHTML = html;
+}
+
+function toggleSlot(char, level, idx) {
+  const data = slotState[char][level];
+  if (idx < data.used) { data.used--; } else { data.used = idx + 1; }
+  renderAllSlots();
+}
+
+function renderAllSlots() {
+  renderSlots('alphie', 'slots-alphie');
+  renderSlots('wren', 'slots-wren');
+  renderSlots('dorrin', 'slots-dorrin');
+  renderSpellDashboard();
+}
+
+function renderSpellDashboard() {
+  const div = document.getElementById('spell-dashboard');
+  if (!div) return;
+  const chars = ['alphie','wren','dorrin'];
+  const names = {alphie:'Alphie',wren:'Wren',dorrin:'Dorrin'};
+  let html = '<div class="grid2">';
+  chars.forEach(c => {
+    html += `<div class="card"><h3>${names[c]}</h3>`;
+    for (const [level, data] of Object.entries(slotState[c])) {
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-family:'Cinzel',serif;font-size:.78em;color:var(--muted);width:50px;">${level}</span>
+        <div class="slot-tracker">`;
+      for (let i = 0; i < data.total; i++) {
+        const used = i < data.used;
+        html += `<div class="slot-circle${used?' used':''}" onclick="toggleSlot('${c}','${level}',${i})" title="${used?'Used':'Available'}">${used?'✕':'✦'}</div>`;
+      }
+      html += `</div></div>`;
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+// ══════════════════════════════
+// HP DASHBOARD
+// ══════════════════════════════
+const hpState = {
+  alphie: { max: 20, cur: 20 },
+  wren:   { max: 24, cur: 24 },
+  dorrin: { max: 30, cur: 30 }
+};
+const hpNames = { alphie: 'Alphie (Wizard 3)', wren: 'Wren (Bard 3)', dorrin: 'Dorrin (Cleric 3)' };
+
+function renderHPDashboard() {
+  const div = document.getElementById('hp-dashboard');
+  if (!div) return;
+  let html = '<div class="grid2">';
+  for (const [char, data] of Object.entries(hpState)) {
+    const pct = Math.max(0, (data.cur / data.max) * 100);
+    const color = pct > 50 ? 'var(--green)' : pct > 25 ? 'var(--gold)' : 'var(--red)';
+    html += `<div class="card">
+      <h3>${hpNames[char]}</h3>
+      <div style="display:flex;align-items:center;gap:10px;margin:8px 0;">
+        <span style="font-family:'Cinzel',serif;font-size:1.4em;color:${color};">${data.cur}</span>
+        <span style="color:var(--muted);">/ ${data.max} HP</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .3s;"></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <button class="btn btn-sm" onclick="adjustHP('${char}',-1)">−1</button>
+        <button class="btn btn-sm" onclick="adjustHP('${char}',-5)">−5</button>
+        <input type="number" id="hp-input-${char}" placeholder="Δ" style="width:60px;">
+        <button class="btn btn-sm btn-gold" onclick="applyHP('${char}')">Apply</button>
+        <button class="btn btn-sm" onclick="adjustHP('${char}',${data.max - data.cur})">Full</button>
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+function adjustHP(char, delta) {
+  const data = hpState[char];
+  data.cur = Math.max(0, Math.min(data.max, data.cur + delta));
+  renderHPDashboard();
+}
+
+function applyHP(char) {
+  const input = document.getElementById('hp-input-' + char);
+  const val = parseInt(input.value) || 0;
+  adjustHP(char, val);
+  input.value = '';
+}
+
+// ══════════════════════════════
+// INITIATIVE TRACKER
+// ══════════════════════════════
+let initList = [];
+let currentTurn = 0;
+let roundNum = 1;
+
+function addInit() {
+  const name = document.getElementById('init-name').value.trim();
+  const roll = parseInt(document.getElementById('init-roll').value) || 0;
+  const hp = parseInt(document.getElementById('init-hp').value) || 10;
+  const type = document.getElementById('init-type').value;
+  if (!name) return;
+  initList.push({ name, roll, hp, maxHp: hp, type, id: Date.now() });
+  document.getElementById('init-name').value = '';
+  document.getElementById('init-roll').value = '';
+  document.getElementById('init-hp').value = '';
+  renderInit();
+}
+
+function quickAdd(name, roll, hp, type) {
+  initList.push({ name, roll, hp, maxHp: hp, type, id: Date.now() });
+  renderInit();
+}
+
+function sortInit() {
+  initList.sort((a, b) => b.roll - a.roll);
+  currentTurn = 0;
+  renderInit();
+}
+
+function nextTurn() {
+  if (!initList.length) return;
+  currentTurn = (currentTurn + 1) % initList.length;
+  if (currentTurn === 0) roundNum++;
+  renderInit();
+}
+
+function clearInit() {
+  if (confirm('Clear all combatants?')) {
+    initList = []; currentTurn = 0; roundNum = 1;
+    renderInit();
+  }
+}
+
+function changeHP(id, delta) {
+  const entry = initList.find(e => e.id === id);
+  if (!entry) return;
+  const inp = document.getElementById('dmg-' + id);
+  const val = inp ? (parseInt(inp.value) || 0) : delta;
+  entry.hp = Math.max(0, entry.hp + (inp ? val : delta));
+  if (inp) inp.value = '';
+  renderInit();
+}
+
+function removeInit(id) {
+  initList = initList.filter(e => e.id !== id);
+  if (currentTurn >= initList.length && initList.length > 0) currentTurn = 0;
+  renderInit();
+}
+
+function renderInit() {
+  const roundDiv = document.getElementById('init-round');
+  if (roundDiv) roundDiv.textContent = initList.length ? `Round ${roundNum} — ${initList[currentTurn]?.name}'s turn` : '';
+  const listDiv = document.getElementById('init-list');
+  if (!listDiv) return;
+  if (!initList.length) { listDiv.innerHTML = '<p style="color:var(--muted);font-size:.9em;">No combatants yet.</p>'; return; }
+  listDiv.innerHTML = initList.map((e, i) => {
+    const isCur = i === currentTurn;
+    const isDead = e.hp <= 0;
+    const hpPct = Math.max(0, (e.hp / e.maxHp) * 100);
+    const hpCol = hpPct > 50 ? 'var(--green)' : hpPct > 25 ? 'var(--gold)' : 'var(--red)';
+    return `<div class="init-entry${isCur?' current':''}${isDead?' dead':''}">
+      <div class="init-score">${e.roll}</div>
+      <div class="init-name">
+        <div>${e.name} <span class="tag tag-${e.type==='pc'?'ally':e.type}">${e.type.toUpperCase()}</span></div>
+        <div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:4px;width:120px;">
+          <div style="height:100%;width:${hpPct}%;background:${hpCol};border-radius:2px;"></div>
+        </div>
+      </div>
+      <div class="init-hp${e.hp <= e.maxHp * .25 ? ' low' : ''}">${e.hp}/${e.maxHp}</div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <input type="number" id="dmg-${e.id}" placeholder="Δ" style="width:52px;padding:3px 6px;font-size:.8em;">
+        <button class="btn btn-sm" onclick="changeHP(${e.id},0)" title="Apply">✓</button>
+        <button class="btn btn-sm btn-red" onclick="removeInit(${e.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+// CONDITIONS
+// ══════════════════════════════
+const conditions = [
+  { name: 'Blinded', desc: 'Auto-fail sight checks. Attack rolls against: advantage. Your attacks: disadvantage.' },
+  { name: 'Charmed', desc: 'Can\'t attack charmer. Charmer has advantage on social checks against you.' },
+  { name: 'Deafened', desc: 'Auto-fail hearing checks.' },
+  { name: 'Exhaustion', desc: '1: Disadv checks · 2: Halved speed · 3: Disadv attacks/saves · 4: Halved max HP · 5: Speed 0 · 6: Death' },
+  { name: 'Frightened', desc: 'Disadvantage on checks/attacks while source is in sight. Can\'t willingly move closer.' },
+  { name: 'Grappled', desc: 'Speed becomes 0. Ends if grappler is incapacitated or moves out of range.' },
+  { name: 'Incapacitated', desc: 'Can\'t take actions or reactions.' },
+  { name: 'Invisible', desc: 'Can\'t be seen normally. Attacks vs you: disadvantage. Your attacks: advantage.' },
+  { name: 'Paralyzed', desc: 'Incapacitated, can\'t move or speak. Auto-fail STR/DEX saves. Attacks have advantage. Hits within 5 ft = critical.' },
+  { name: 'Petrified', desc: 'Transformed to stone. Incapacitated, can\'t move. Resistance to all damage. Immune poison/disease.' },
+  { name: 'Poisoned', desc: 'Disadvantage on attack rolls and ability checks.' },
+  { name: 'Prone', desc: 'Disadvantage on attacks. Melee attacks against you: advantage. Ranged: disadvantage. Stand up costs half movement.' },
+  { name: 'Restrained', desc: 'Speed 0. Attacks vs you: advantage. Your attacks: disadvantage. Disadvantage DEX saves.' },
+  { name: 'Stunned', desc: 'Incapacitated. Auto-fail STR/DEX saves. Attacks have advantage.' },
+  { name: 'Unconscious', desc: 'Incapacitated, can\'t move or speak. Unaware of surroundings. Drop whatever held, fall prone. Auto-fail STR/DEX saves. Attacks: advantage, within 5 ft = critical.' },
+  { name: 'Concentration', desc: 'REMINDER: Taking damage → DC 10 or half damage taken, CON save, or lose spell.' },
+];
+
+let activeConditions = new Set();
+
+function renderConditions() {
+  const grid = document.getElementById('cond-grid');
+  if (!grid) return;
+  grid.innerHTML = conditions.map(c => {
+    const active = activeConditions.has(c.name);
+    return `<div class="condition-card${active?' active-cond':''}" onclick="toggleCondition('${c.name}')">
+      <h4>${active?'⚠ ':''}${c.name}</h4>
+      <p>${c.desc}</p>
+    </div>`;
+  }).join('');
+}
+
+function toggleCondition(name) {
+  if (activeConditions.has(name)) activeConditions.delete(name);
+  else activeConditions.add(name);
+  renderConditions();
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderAllSlots();
+  renderHPDashboard();
+  renderConditions();
+  renderInit();
+
+  // Pre-load party into initiative
+  quickAdd('Alphie J. Roane', 14, 20, 'pc');
+  quickAdd('Wren', 14, 24, 'pc');
+  quickAdd('Dorrin Stonebrook', 12, 30, 'pc');
+});
+</script>
+</body>
+</html>

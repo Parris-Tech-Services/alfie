@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alfie's D&D Dashboard v3 — Rumblings</title>
+  <style>
+    :root {
+      --bg-primary: #0d1117; --bg-secondary: #161b22; --bg-card: #1c2128;
+      --text-primary: #e6edf3; --accent-primary: #58a6ff; --danger: #f85149;
+      --success: #3fb950; --border-color: #30363d;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); margin: 0; }
+    
+    /* Navigation Tabs */
+    .nav-tabs { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); display: flex; padding: 0 20px; }
+    .tab-link { padding: 15px 25px; cursor: pointer; border-bottom: 2px solid transparent; color: #8b949e; }
+    .tab-link.active { border-color: var(--accent-primary); color: var(--accent-primary); font-weight: bold; }
+
+    .main-container { padding: 30px; display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+
+    /* Cards */
+    .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .card-title { font-size: 0.9em; text-transform: uppercase; color: var(--accent-primary); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+
+    /* Spell Slot Battery */
+    .slot-grid { display: flex; gap: 5px; margin-top: 10px; }
+    .slot { width: 15px; height: 15px; border: 1px solid var(--accent-primary); border-radius: 3px; }
+    .slot.spent { background: transparent; border-color: #333; }
+    .slot.full { background: var(--accent-primary); }
+
+    /* Ordning List */
+    .ordning-item { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9em; border-bottom: 1px dashed #333; }
+    .ordning-rank { color: #8b949e; }
+
+    /* Quest Log */
+    .quest { border-left: 3px solid var(--success); padding-left: 15px; margin-bottom: 15px; }
+    .quest-desc { font-size: 0.85em; color: #8b949e; }
+
+  </style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+  <div class="tab-link active" onclick="openTab(event, 'dashboard')">Dashboard</div>
+  <div class="tab-link" onclick="openTab(event, 'questlog')">Quest Log</div>
+  <div class="tab-link" onclick="openTab(event, 'lore')">Giant Lore</div>
+  <div class="tab-link" onclick="openTab(event, 'maps')">Maps</div>
+</nav>
+
+<div class="main-container">
+  <section>
+    <div id="dashboard" class="content-section active">
+      <div class="card">
+        <div class="card-title">Party Status (Post-Nightstone Blitz)</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <strong>Alphie (Wizard 2)</strong><br>
+            <span style="font-size: 0.8em; color: var(--danger);">HP: 25/25 (Aid) | AC: 15</span>
+            <div class="slot-grid">
+              <span style="font-size: 0.7em;">Slots:</span>
+              <div class="slot spent"></div><div class="slot spent"></div><div class="slot spent"></div>
+            </div>
+          </div>
+          <div>
+            <strong>Dorrin (Cleric 2)</strong><br>
+            <span style="font-size: 0.8em; color: var(--danger);">HP: 17/21 (Aid) | AC: 18</span>
+            <div class="slot-grid">
+              <span style="font-size: 0.7em;">Slots:</span>
+              <div class="slot spent"></div><div class="slot spent"></div><div class="slot spent"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Active Maneuver: The Dripping Caves</div>
+        <p style="font-size: 0.9em;">Currently dismounting 60ft from South Entrance. 
+          <span style="color:var(--success)">Chimney Team</span> is in position for stealth extraction.</p>
+      </div>
+    </div>
+
+    <div id="questlog" class="content-section">
+      <div class="card">
+        <div class="card-title">Current Objectives</div>
+        <div class="quest">
+          <strong>Rescue Nightstone Survivors</strong>
+          <p class="quest-desc">Locate and extract villagers from the Dripping Caves. Avoid Ogre detection.</p>
+        </div>
+        <div class="quest">
+          <strong>Deliver to Goldenfields</strong>
+          <p class="quest-desc">Carry the letter to Miros Xelbrin regarding the fate of his family.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="lore" class="content-section">
+      
+      <div class="card">
+        <div class="card-title">The Ordning (Giant Hierarchy)</div>
+        <div class="ordning-item"><span>Storm Giants</span><span class="ordning-rank">1 (Highest)</span></div>
+        <div class="ordning-item"><span>Cloud Giants</span><span class="ordning-rank">2 (Nightstone Attackers)</span></div>
+        <div class="ordning-item"><span>Fire Giants</span><span class="ordning-rank">3</span></div>
+        <div class="ordning-item"><span>Frost Giants</span><span class="ordning-rank">4</span></div>
+        <div class="ordning-item"><span>Stone Giants</span><span class="ordning-rank">5</span></div>
+        <div class="ordning-item"><span>Hill Giants</span><span class="ordning-rank">6 (Dripping Caves Allies)</span></div>
+        <p style="font-size: 0.8em; margin-top:15px; color:#8b949e;">Lore: The All-Father has shattered the Ordning. Giants are now vying for new positions through acts of great upheaval.</p>
+      </div>
+    </div>
+
+    <div id="maps" class="content-section">
+      <div class="card">
+        <div class="card-title">Tactical Maps</div>
+        <p><em>Waiting for Ardeep Scout reconnaissance data...</em></p>
+      </div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <div class="card-title">Coalition Units</div>
+      <ul style="list-style: none; padding: 0; font-size: 0.85em;">
+        <li>⚔️ Xolkin (Zhent Captain)</li>
+        <li>🏹 Rond (Ardeep Leader)</li>
+        <li>🛡️ Sydiri (Militia Sergeant)</li>
+        <li>🕵️ Kella (Spy/Infiltrator)</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">Major Inventory</div>
+      <ul style="list-style: none; padding: 0; font-size: 0.85em;">
+        <li>💎 Morak's Gems (2)</li>
+        <li>🛡️ Dwarven Chain (+1)</li>
+        <li>🧪 Potion of Heroism</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script>
+  function openTab(evt, tabName) {
+    var i, content, tablinks;
+    content = document.getElementsByClassName("content-section");
+    for (i = 0; i < content.length; i++) {
+      content[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-link");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+</script>
+
+</body>
+</html>

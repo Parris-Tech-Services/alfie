@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alfie's D&D Dashboard — Storm King's Thunder</title>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --bg-card: #1c2128;
+      --border-color: #30363d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-primary: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --font-sans: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #fafbfc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f0f3f6;
+      --bg-card: #ffffff;
+      --border-color: #d0d7de;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-sans); background: var(--bg-primary); color: var(--text-primary); }
+
+    .app-container { display: flex; min-height: 100vh; }
+
+    /* Sidebar - File Explorer */
+    .sidebar {
+      width: 300px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
+    .sidebar-header h1 { font-size: 1.2em; color: var(--accent-primary); }
+
+    /* Main Dashboard Area */
+    .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+
+    /* Session Status Banner */
+    .status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--accent-primary);
+    }
+
+    .status-info h2 { font-size: 0.9em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .status-info p { font-size: 1.1em; font-weight: 600; }
+
+    /* Party Grid */
+    .party-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .char-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+    }
+
+    .char-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .char-name { font-weight: bold; color: var(--accent-primary); }
+    .char-hp { font-size: 0.85em; color: var(--text-secondary); }
+
+    .hp-bar-container { background: #333; height: 8px; border-radius: 4px; margin-bottom: 10px; overflow: hidden; }
+    .hp-bar { height: 100%; background: var(--success); transition: width 0.3s; }
+
+    .char-stats { display: flex; gap: 10px; font-size: 0.8em; color: var(--text-muted); }
+    .stat-badge { background: var(--bg-tertiary); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); }
+
+    /* Section Headers */
+    .section-title { font-size: 1.2em; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border-color); }
+
+    /* Plans Card */
+    .mission-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+    .plan-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; }
+    .plan-box.loud { border-top: 4px solid var(--danger); }
+    .plan-box.stealth { border-top: 4px solid var(--success); }
+    .plan-box h3 { margin-bottom: 10px; font-size: 1em; }
+    .plan-box ul { list-style: none; font-size: 0.9em; color: var(--text-secondary); }
+    .plan-box li { margin-bottom: 5px; }
+
+    .tag { font-size: 0.7em; padding: 2px 6px; border-radius: 4px; background: var(--bg-tertiary); }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Campaign Repo</h1>
+      <p style="font-size: 0.8em; color: var(--text-muted)">Storm King's Thunder</p>
+    </div>
+    <div id="file-list" style="padding: 15px; font-size: 0.9em; overflow-y: auto;">
+      </div>
+  </aside>
+
+  <main class="main-content">
+    
+    <div class="status-banner">
+      <div class="status-info">
+        <h2>Current Location</h2>
+        <p>📍 Nightstone Outskirts (North Road)</p>
+      </div>
+      <div class="status-info" style="text-align: center;">
+        <h2>Active Objective</h2>
+        <p>🎯 Dripping Caves Rescue Mission</p>
+      </div>
+      <div class="status-info" style="text-align: right;">
+        <h2>In-Game Time</h2>
+        <p>⏳ Early Afternoon (Day 2)</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">Party Status (Aid Buff Active)</h2>
+    <div class="party-grid">
+      <div class="char-card">
+        <div class="char-header">
+          <span class="char-name">Alphie J. Roane</span>
+          <span class="char-hp">25 / 25 HP</span>
+        </div>
+        <div class="hp-bar-container"><div class="hp-bar" style="width: 100%;"></div></div>
+        <div class="char-stats">
+          <span class="stat-badge">AC 15</span>
+          <span class="stat-badge">Portents: 19, 3</span>
+          <span class="stat-badge">Slots: 0/3</span>
+        </div>
+      </div>
+      <div class="char-card">
+        <div class="char-header">
+          <span class="char-name">Dorrin Stonebrook</span>
+          <span class="char-hp">17 / 21 HP</span>
+        </div>
+        <div class="hp-bar-container"><div class="hp-bar" style="width: 81%;"></div></div>
+        <div class="char-stats">
+          <span class="stat-badge">AC 18</span>
+          <span class="stat-badge">Heroism Potion</span>
+          <span class="stat-badge">CD: Ready</span>
+        </div>
+      </div>
+      <div class="char-card">
+        <div class="char-header">
+          <span class="char-name">Wren</span>
+          <span class="char-hp">29 / 29 HP</span>
+        </div>
+        <div class="hp-bar-container"><div class="hp-bar" style="width: 100%;"></div></div>
+        <div class="char-stats">
+          <span class="stat-badge">AC 13</span>
+          <span class="stat-badge">BI: 3/3</span>
+          <span class="stat-badge">Healing Potion</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Operational Plan: The Dripping Caves</h2>
+    <div class="mission-container">
+      <div class="plan-box loud">
+        <h3>Team South Mouth (The Distraction)</h3>
+        <ul>
+          <li><b>Lead:</b> Alphie, Dorrin, Xolkin</li>
+          <li><b>Support:</b> Sydiri, Joren, Alara, 4 Scouts</li>
+          <li><b>Goal:</b> Maximum noise to draw out ogres.</li>
+        </ul>
+      </div>
+      <div class="plan-box stealth">
+        <h3>Team Chimney (The Extraction)</h3>
+        <ul>
+          <li><b>Lead:</b> Rond Arrowhome, Kella</li>
+          <li><b>Support:</b> Wren, 3 Scouts</li>
+          <li><b>Goal:</b> Stealth infiltrate to rescue villagers.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="section-title">Key Inventory Items</h2>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <span class="stat-badge">📦 Morak's Chest (Dwarven Armor + Gems)</span>
+      <span class="stat-badge">📜 Goldenfields Letter</span>
+      <span class="stat-badge">🐴 6 Spare Horses (Lead String)</span>
+    </div>
+
+  </main>
+</div>
+
+<script src="site/repo-data.js"></script>
+<script>
+  // Dynamic File Browser Loader
+  function renderFiles() {
+    const list = document.getElementById('file-list');
+    if (!window.REPO_DATA) return;
+    
+    const folders = {};
+    window.REPO_DATA.files.forEach(f => {
+      if (!folders[f.group]) folders[f.group] = [];
+      folders[f.group].push(f);
+    });
+
+    for (const group in folders) {
+      const groupEl = document.createElement('div');
+      groupEl.innerHTML = `<h3 style="margin-top:15px; color:var(--text-muted); font-size:0.8em; text-transform:uppercase;">${group}</h3>`;
+      folders[group].forEach(file => {
+        const item = document.createElement('div');
+        item.style.padding = "5px 0";
+        item.innerHTML = `<a href="${file.path}" style="color:var(--accent-primary); text-decoration:none;">📄 ${file.name}</a>`;
+        groupEl.appendChild(item);
+      });
+      list.appendChild(groupEl);
+    }
+  }
+  renderFiles();
+</script>
+</body>
+</html>
